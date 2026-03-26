@@ -1831,50 +1831,45 @@
 
     /* ── INSTALL BANNER ───────────────────────────────────────────────────────── */
     #install-banner {
-      display: none !important;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 300;
+      background: var(--accent);
+      color: #0a0a14;
+      padding: 10px 16px;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
     }
 
-    @media(max-width:1023px) {
-      #install-banner {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 300;
-        background: var(--accent);
-        color: #0a0a14;
-        padding: 10px 16px;
-        align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        font-weight: 700;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
-      }
-
-      #install-banner.show {
-        display: flex;
-      }
-
-      #install-banner button {
-        background: rgba(0, 0, 0, .2);
-        border: none;
-        color: #0a0a14;
-        font-weight: 800;
-        padding: 5px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 12px;
-        font-family: 'Outfit', sans-serif;
-      }
-
-      #install-banner .close-banner {
-        margin-left: auto;
-        background: none;
-        font-size: 18px;
-        padding: 2px 6px;
-      }
+    #install-banner.show {
+      display: flex;
     }
+
+    #install-banner button {
+      background: rgba(0, 0, 0, .2);
+      border: none;
+      color: #0a0a14;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    #install-banner .close-banner {
+      margin-left: auto;
+      background: none;
+      font-size: 18px;
+      padding: 2px 6px;
+    }
+
 
     /* ── SIDEBAR INSTALL ITEM HIDDEN ───────────────────────────────────────── */
     #sidebar .nav-install {
@@ -1898,6 +1893,86 @@
       margin-bottom: 6px;
       display: block
     }
+
+    /* ── PROFILE PIC ─────────────────────────────────────────────────────────── */
+    .avatar-upload-wrap {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .avatar-upload-wrap:hover .avatar-upload-overlay {
+      opacity: 1;
+    }
+
+    .avatar-upload-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: rgba(0, 0, 0, .55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .crop-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .85);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .crop-modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .crop-canvas-wrap {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      margin: 0 auto 18px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 2px solid var(--border2);
+      background: #000;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .crop-canvas-wrap:active {
+      cursor: grabbing;
+    }
+
+    #crop-img {
+      position: absolute;
+      transform-origin: center center;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .crop-guide {
+      position: absolute;
+      inset: 20px;
+      border: 2px dashed rgba(255, 255, 255, .5);
+      border-radius: 50%;
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -1910,10 +1985,39 @@
   <script>
     // ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
     // 👉 Replace these two values with your own from Supabase → Settings → API
-    // ⚠️  RLS NOTE: If you have Row Level Security enabled on your Supabase tables,
-    //     make sure to add policies that allow INSERT, UPDATE, SELECT, and DELETE
-    //     for the anon role (or authenticated role if using Supabase Auth).
-    //     Without RLS policies, all DB writes will silently fail.
+    // ⚠️  REQUIRED SUPABASE TABLE SCHEMA:
+    //
+    //  CREATE TABLE users (
+    //    id TEXT PRIMARY KEY,
+    //    username TEXT UNIQUE NOT NULL,       -- stored lowercase for uniqueness
+    //    display_name TEXT,                   -- stores original casing (e.g. "Viki")
+    //    password TEXT NOT NULL,
+    //    role TEXT DEFAULT 'user',
+    //    joined TEXT,
+    //    avatar_color TEXT,
+    //    avatar_url TEXT,                     -- base64 or URL for profile picture
+    //    bio TEXT DEFAULT '',
+    //    theme TEXT DEFAULT 'dark'
+    //  );
+    //
+    //  CREATE TABLE shops (
+    //    id TEXT PRIMARY KEY, name TEXT, address TEXT, creator_id TEXT, menu JSONB
+    //  );
+    //
+    //  CREATE TABLE sessions (
+    //    id TEXT PRIMARY KEY, shop_id TEXT, creator_id TEXT,
+    //    location TEXT, locked BOOLEAN DEFAULT FALSE, closed BOOLEAN DEFAULT FALSE
+    //  );
+    //
+    //  CREATE TABLE orders (
+    //    id TEXT PRIMARY KEY, session_id TEXT, user_id TEXT, user_name TEXT,
+    //    item_id TEXT, item_name TEXT, price NUMERIC, quantity INT, note TEXT DEFAULT ''
+    //  );
+    //
+    //  -- Enable RLS and add policies for anon role on all four tables:
+    //  ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+    //  CREATE POLICY "allow_all" ON users FOR ALL USING (true) WITH CHECK (true);
+    //  -- (repeat for shops, sessions, orders)
     const SUPABASE_URL = 'https://ijomccrisaffrrlbonuk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlqb21jY3Jpc2FmZnJybGJvbnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTI0NDcsImV4cCI6MjA5MDA2ODQ0N30.UGJj1gBn3bxMjxKuROW01Wb40oprpoaxjD_Y2Az1C7k';
 
@@ -1943,7 +2047,7 @@
             db.from('sessions').select('*'),
             db.from('orders').select('*'),
           ]);
-          state.users = (users.data || []).map(u => ({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatarColor: u.avatar_color, bio: u.bio, theme: u.theme }));
+          state.users = (users.data || []).map(u => ({ id: u.id, username: u.display_name || u.username, password: u.password, role: u.role, joined: u.joined, avatarColor: u.avatar_color, bio: u.bio, theme: u.theme, avatarUrl: u.avatar_url || null }));
           state.shops = (shops.data || []).map(s => ({ id: s.id, name: s.name, address: s.address, creatorId: s.creator_id, menu: s.menu || [] }));
           state.sessions = (sessions.data || []).map(s => ({ id: s.id, shopId: s.shop_id, creatorId: s.creator_id, location: s.location, locked: s.locked, closed: s.closed }));
           state.orders = (orders.data || []).map(o => ({ id: o.id, sessionId: o.session_id, userId: o.user_id, userName: o.user_name, itemId: o.item_id, itemName: o.item_name, price: o.price, quantity: o.quantity, note: o.note }));
@@ -1954,7 +2058,18 @@
       async upsertUser(u) {
         const db = getDB(); if (!db) return;
         try {
-          const { error } = await db.from('users').upsert({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatar_color: u.avatarColor, bio: u.bio || '', theme: u.theme || 'dark' });
+          const { error } = await db.from('users').upsert({
+            id: u.id,
+            username: u.username.toLowerCase(), // lowercase for uniqueness index
+            display_name: u.username,           // preserve original casing
+            password: u.password,
+            role: u.role,
+            joined: u.joined,
+            avatar_color: u.avatarColor,
+            bio: u.bio || '',
+            theme: u.theme || 'dark',
+            avatar_url: u.avatarUrl || null
+          });
           if (error) { console.error('upsertUser error:', error); toast('Failed to save user to DB', 'error'); }
         } catch (e) { console.error('upsertUser exception:', e); }
       },
@@ -2089,7 +2204,8 @@
 
     // ── AUTH ─────────────────────────────────────────────────────────────────────
     function handleAuth(username, password, isReg) {
-      const u = username.trim().toLowerCase();
+      const uRaw = username.trim(); // preserve original casing
+      const u = uRaw.toLowerCase();  // for comparison only
       const p = password;
       if (!u || !p) {
         state._authError = 'Please fill in all fields';
@@ -2106,7 +2222,7 @@
           save(); render(); return;
         }
         const nu = {
-          id: gid(), username: u, password: p, role: state.users.length === 0 ? 'admin' : 'user',
+          id: gid(), username: uRaw, password: p, role: state.users.length === 0 ? 'admin' : 'user',
           joined: new Date().toLocaleDateString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], bio: '', theme: 'dark'
         };
         state.users.push(nu); state.user = nu;
@@ -2182,9 +2298,11 @@
     }
 
     function avatarHtml(u, size = 40, radius = 12) {
-      // Use accent CSS variable (theme color) instead of per-user avatarColor
       const fs = Math.round(size * .38);
-      return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:var(--accent);font-size:${fs}px;color:#0a0a14">${(u?.username || '?')[0].toUpperCase()}</div>`;
+      if (u?.avatarUrl) {
+        return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;overflow:hidden;flex-shrink:0"><img src="${u.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:${radius}px" /></div>`;
+      }
+      return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:var(--accent);font-size:${fs}px;color:#0a0a14;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0">${(u?.username || '?')[0].toUpperCase()}</div>`;
     }
 
     // ── EXPORT / IMPORT ──────────────────────────────────────────────────────────
@@ -2250,23 +2368,44 @@
         });
 
         const text = lines.join('\n');
+        const fileName = `TeaRound_Summary_${session.id}_${new Date().toISOString().slice(0, 10)}.txt`;
 
-        // Try clipboard first, then file download
+        // Method 1: Try native share API (best on mobile)
+        if (navigator.share) {
+          try {
+            const file = new File([text], fileName, { type: 'text/plain' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: 'TeaRound Summary' });
+              toast('Summary shared! ✅');
+              return;
+            }
+          } catch (shareErr) {
+            if (shareErr.name !== 'AbortError') console.warn('Share failed, trying download', shareErr);
+            else return; // user cancelled share
+          }
+        }
+
+        // Method 2: Clipboard + file download
+        try { await navigator.clipboard.writeText(text); toast('Summary copied to clipboard! 📋'); } catch (_) { }
+
         try {
-          await navigator.clipboard.writeText(text);
-          toast('Summary copied to clipboard! 📋');
-        } catch (_) { }
-
-        // Always also trigger text file download
-        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `TeaRound_Summary_${session.id}_${new Date().toISOString().slice(0, 10)}.txt`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast('Summary downloaded! ✅');
-      } catch (err) { console.error('Download failed', err); toast('Download failed', 'error'); }
+          const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = fileName;
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+          toast('Summary downloaded! ✅');
+        } catch (dlErr) {
+          // Method 3: data URI fallback for strict mobile browsers
+          const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+          const a = document.createElement('a');
+          a.href = dataUri; a.download = fileName;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          toast('Summary downloaded! ✅');
+        }
+      } catch (err) { console.error('Download failed', err); toast('Download failed — try copying the text manually', 'error'); }
     }
 
     // ── RENDER PAGES ─────────────────────────────────────────────────────────────
@@ -2419,8 +2558,14 @@
 
     // ── HOME ─────────────────────────────────────────────────────────────────────
     function renderHome() {
-      const activeSessions = state.sessions.filter(s => !s.closed);
-      const closedSessions = state.sessions.filter(s => s.closed);
+      const myUserId = state.user?.id;
+      // A session belongs to this user if they created it OR placed at least one order in it
+      const mySessionIds = new Set([
+        ...state.sessions.filter(s => s.creatorId === myUserId).map(s => s.id),
+        ...state.orders.filter(o => o.userId === myUserId).map(o => o.sessionId)
+      ]);
+      const activeSessions = state.sessions.filter(s => !s.closed && mySessionIds.has(s.id));
+      const closedSessions = state.sessions.filter(s => s.closed && mySessionIds.has(s.id));
       const totalOrders = state.orders.filter(o => o.userId === state.user?.id).length;
       const hosted = state.sessions.filter(s => s.creatorId === state.user?.id).length;
       const spent = state.orders.filter(o => o.userId === state.user?.id).reduce((a, o) => a + o.price * o.quantity, 0);
@@ -2909,7 +3054,14 @@
     <!-- Hero -->
     <div class="profile-hero">
       <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
-        ${avatarHtml(u, 72, 18)}
+        <div class="avatar-upload-wrap" onclick="openAvatarPicker()" title="Change profile picture">
+          ${avatarHtml(u, 72, 18)}
+          <div class="avatar-upload-overlay">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Edit Photo</span>
+          </div>
+          <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarFile(this)"/>
+        </div>
         <div style="flex:1">
           ${state._editProfile ? `
             <div class="stack-8">
@@ -2939,6 +3091,7 @@
           `}
         </div>
       </div>
+    </div>
 
       <!-- Theme color picker (replaces avatar color — shown when editing) -->
       ${state._editProfile ? `
@@ -3269,6 +3422,212 @@
         const locEl = document.getElementById('session-loc');
         if (locEl) locEl.value = state._newSessionLoc;
       });
+    }
+
+    // ── AVATAR CROP SYSTEM ────────────────────────────────────────────────────────
+    const _crop = {
+      img: null, src: null,
+      x: 0, y: 0, scale: 1,
+      dragging: false, startX: 0, startY: 0, startImgX: 0, startImgY: 0,
+      canvasW: 280, canvasH: 280
+    };
+
+    function openAvatarPicker() {
+      const inp = document.getElementById('avatar-file-input');
+      if (inp) inp.click();
+    }
+
+    function handleAvatarFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        _crop.src = e.target.result;
+        _crop.x = 0; _crop.y = 0; _crop.scale = 1;
+        showCropModal();
+      };
+      reader.readAsDataURL(file);
+      input.value = ''; // reset so same file can be re-selected
+    }
+
+    function showCropModal() {
+      // Remove existing crop modal if any
+      const existing = document.getElementById('crop-modal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'crop-modal';
+      modal.className = 'crop-modal-overlay';
+      modal.innerHTML = `
+        <div class="crop-modal-box">
+          <div class="font-syne font-black" style="font-size:20px;color:var(--text);margin-bottom:6px">Edit Profile Photo</div>
+          <div class="text-muted text-sm" style="margin-bottom:18px">Drag to reposition · Pinch or scroll to zoom</div>
+          <div class="crop-canvas-wrap" id="crop-area">
+            <img id="crop-img" src="${_crop.src}" draggable="false"/>
+            <div class="crop-guide"></div>
+          </div>
+          <div style="margin-bottom:18px">
+            <label class="form-label" style="margin-bottom:8px">Zoom</label>
+            <input type="range" id="crop-zoom" min="0.3" max="3" step="0.01" value="1"
+              style="width:100%;accent-color:var(--accent)"
+              oninput="setCropScale(parseFloat(this.value))"/>
+          </div>
+          <div class="flex gap-10">
+            <button class="btn btn-dark" style="flex:1" onclick="closeCropModal()">Cancel</button>
+            <button class="btn btn-danger btn-sm" style="padding:0 14px" onclick="removeAvatar()">Remove Photo</button>
+            <button class="btn btn-primary" style="flex:1" onclick="cropAndSave()">✓ Save</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+
+      // Wait for image to load then set initial position/scale
+      const img = document.getElementById('crop-img');
+      img.onload = () => {
+        _crop.img = img;
+        // Auto-fit: scale so image fills the crop area
+        const fitScale = Math.max(_crop.canvasW / img.naturalWidth, _crop.canvasH / img.naturalHeight);
+        _crop.scale = fitScale;
+        _crop.x = (_crop.canvasW - img.naturalWidth * fitScale) / 2;
+        _crop.y = (_crop.canvasH - img.naturalHeight * fitScale) / 2;
+        document.getElementById('crop-zoom').value = fitScale;
+        document.getElementById('crop-zoom').min = Math.max(0.1, fitScale * 0.5);
+        applyCropTransform();
+        attachCropEvents();
+      };
+      if (img.complete) img.onload();
+    }
+
+    function applyCropTransform() {
+      const img = document.getElementById('crop-img');
+      if (!img || !_crop.img) return;
+      img.style.width = (_crop.img.naturalWidth * _crop.scale) + 'px';
+      img.style.height = (_crop.img.naturalHeight * _crop.scale) + 'px';
+      img.style.left = _crop.x + 'px';
+      img.style.top = _crop.y + 'px';
+    }
+
+    function setCropScale(newScale) {
+      const area = document.getElementById('crop-area');
+      if (!area || !_crop.img) return;
+      const cx = _crop.canvasW / 2, cy = _crop.canvasH / 2;
+      // Scale around center
+      const ratio = newScale / _crop.scale;
+      _crop.x = cx - (cx - _crop.x) * ratio;
+      _crop.y = cy - (cy - _crop.y) * ratio;
+      _crop.scale = newScale;
+      applyCropTransform();
+    }
+
+    function attachCropEvents() {
+      const area = document.getElementById('crop-area');
+      if (!area) return;
+
+      // Mouse drag
+      area.addEventListener('mousedown', e => {
+        _crop.dragging = true;
+        _crop.startX = e.clientX; _crop.startY = e.clientY;
+        _crop.startImgX = _crop.x; _crop.startImgY = _crop.y;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!_crop.dragging) return;
+        _crop.x = _crop.startImgX + (e.clientX - _crop.startX);
+        _crop.y = _crop.startImgY + (e.clientY - _crop.startY);
+        applyCropTransform();
+      });
+      window.addEventListener('mouseup', () => { _crop.dragging = false; });
+
+      // Touch drag + pinch
+      let lastTouchDist = null;
+      area.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+          _crop.dragging = true;
+          _crop.startX = e.touches[0].clientX; _crop.startY = e.touches[0].clientY;
+          _crop.startImgX = _crop.x; _crop.startImgY = _crop.y;
+        } else if (e.touches.length === 2) {
+          lastTouchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY);
+        }
+        e.preventDefault();
+      }, { passive: false });
+      area.addEventListener('touchmove', e => {
+        if (e.touches.length === 1 && _crop.dragging) {
+          _crop.x = _crop.startImgX + (e.touches[0].clientX - _crop.startX);
+          _crop.y = _crop.startImgY + (e.touches[0].clientY - _crop.startY);
+          applyCropTransform();
+        } else if (e.touches.length === 2 && lastTouchDist !== null) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY);
+          const newScale = Math.min(3, Math.max(0.1, _crop.scale * (dist / lastTouchDist)));
+          setCropScale(newScale);
+          document.getElementById('crop-zoom').value = newScale;
+          lastTouchDist = dist;
+        }
+        e.preventDefault();
+      }, { passive: false });
+      area.addEventListener('touchend', e => {
+        if (e.touches.length < 2) lastTouchDist = null;
+        if (e.touches.length === 0) _crop.dragging = false;
+      });
+
+      // Scroll to zoom (desktop)
+      area.addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.08 : 0.08;
+        const newScale = Math.min(3, Math.max(0.1, _crop.scale + delta));
+        setCropScale(newScale);
+        document.getElementById('crop-zoom').value = newScale;
+      }, { passive: false });
+    }
+
+    function closeCropModal() {
+      const m = document.getElementById('crop-modal');
+      if (m) m.remove();
+    }
+
+    function removeAvatar() {
+      const patch = { avatarUrl: null };
+      updateUser(patch);
+      DB.upsertUser({ ...state.user, ...patch });
+      setState({ _editProfile: false });
+      closeCropModal();
+      toast('Profile photo removed');
+    }
+
+    function cropAndSave() {
+      if (!_crop.img || !_crop.src) return;
+      try {
+        const SIZE = 256; // output canvas size
+        const canvas = document.createElement('canvas');
+        canvas.width = SIZE; canvas.height = SIZE;
+        const ctx = canvas.getContext('2d');
+
+        // The crop area is 280×280. We need to map what's visible in the center
+        // circle (which has a guide circle at inset:20, so radius = 120)
+        // But we just export the full 280×280 square, cropped to SIZE×SIZE.
+        const scaleToOutput = SIZE / _crop.canvasW;
+        ctx.drawImage(
+          _crop.img,
+          _crop.x * scaleToOutput,
+          _crop.y * scaleToOutput,
+          _crop.img.naturalWidth * _crop.scale * scaleToOutput,
+          _crop.img.naturalHeight * _crop.scale * scaleToOutput
+        );
+
+        // Round to circle by clipping
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        const patch = { avatarUrl: dataUrl };
+        updateUser(patch);
+        DB.upsertUser({ ...state.user, ...patch });
+        setState({});
+        closeCropModal();
+        toast('Profile photo saved! 📸');
+      } catch (e) {
+        console.error('Crop failed', e);
+        toast('Failed to save photo', 'error');
+      }
     }
 
     // ── BOOT ──────────────────────────────────────────────────────────────────────
