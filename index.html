@@ -1,564 +1,1555 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="TeaRound"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="theme-color" content="#0d0d14"/>
-<meta name="description" content="Effortless group tea & coffee orders"/>
-<link rel="manifest" href="./manifest.json"/>
-<title>TeaRound Pro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-/* ── RESET & BASE ─────────────────────────────────────────────────────────── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{height:100%;-webkit-text-size-adjust:100%}
-body{height:100%;font-family:'DM Sans',system-ui,sans-serif;overflow-x:hidden;background:#0d0d14}
-input,button,textarea,select{font-family:inherit}
-button{cursor:pointer;border:none;background:none}
-input,textarea{border:none;outline:none}
-img{max-width:100%;display:block}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TeaRound" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0d0d14" />
+  <meta name="description" content="Effortless group tea & coffee orders" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>TeaRound Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ── RESET & BASE ─────────────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent
+    }
 
-/* ── CSS VARIABLES / THEMES ───────────────────────────────────────────────── */
-:root{
-  /* Dark theme (default) */
-  --bg:#0d0d14;
-  --surface:#141420;
-  --surface2:#1a1a2e;
-  --border:#ffffff0f;
-  --border2:#ffffff18;
-  --text:#f0f0ff;
-  --text2:#8888aa;
-  --text3:#44445a;
-  --accent:#00c896;
-  --accent-dim:#00c89618;
-  --accent-text:#00c896;
-  --danger:#ff4466;
-  --danger-dim:#ff446618;
-  --warn:#f59e0b;
-  --shadow:0 8px 40px #00000055;
-  --shadow-accent:0 8px 40px #00c89630;
-  --nav-bg:#0d0d14ee;
-  --radius:16px;
-  --radius-lg:24px;
-  --radius-xl:32px;
-}
-[data-theme="light"]{
-  --bg:#f5f5f0;--surface:#ffffff;--surface2:#f0f0ea;--border:#e8e8e0;--border2:#d8d8d0;
-  --text:#1a1a2e;--text2:#666688;--text3:#aaaacc;--accent:#00a87a;--accent-dim:#00a87a15;
-  --accent-text:#007a58;--danger:#e02050;--danger-dim:#e0205015;--warn:#d97706;
-  --shadow:0 4px 24px #0000000a;--shadow-accent:0 8px 32px #00a87a25;--nav-bg:#fffffff0;
-}
-[data-theme="warm"]{
-  --bg:#1a1208;--surface:#231a0a;--surface2:#2e2010;--border:#ffffff0a;--border2:#ffffff15;
-  --text:#f5e6c8;--text2:#9a7a50;--text3:#5a4030;--accent:#f0a030;--accent-dim:#f0a03018;
-  --accent-text:#f0a030;--danger:#e05030;--danger-dim:#e0503018;--warn:#f0a030;
-  --shadow:0 8px 40px #00000066;--shadow-accent:0 8px 40px #f0a03030;--nav-bg:#1a1208ee;
-}
-[data-theme="neon"]{
-  --bg:#020208;--surface:#06060f;--surface2:#0a0a18;--border:#00ffcc08;--border2:#00ffcc15;
-  --text:#d0d0ff;--text2:#5050aa;--text3:#2a2a5a;--accent:#00ffcc;--accent-dim:#00ffcc10;
-  --accent-text:#00ffcc;--danger:#ff0066;--danger-dim:#ff006615;--warn:#ffaa00;
-  --shadow:0 8px 60px #00000088;--shadow-accent:0 0 40px #00ffcc20;--nav-bg:#020208f0;
-}
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%
+    }
 
-/* ── LAYOUT ───────────────────────────────────────────────────────────────── */
-#app{
-  display:flex;min-height:100vh;background:var(--bg);color:var(--text);
-  transition:background .3s,color .3s;
-}
+    body {
+      height: 100%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+      background: #0d0d14
+    }
 
-/* Sidebar (desktop) */
-#sidebar{
-  width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;padding:28px 20px;position:fixed;top:0;left:0;bottom:0;
-  z-index:100;transition:transform .3s;
-}
-#sidebar .logo{display:flex;align-items:center;gap:12px;padding:8px 12px;margin-bottom:36px}
-#sidebar .logo-icon{width:40px;height:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-#sidebar .logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px}
-#sidebar .logo-sub{font-size:10px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.1em}
-#sidebar nav{display:flex;flex-direction:column;gap:4px;flex:1}
-#sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius);color:var(--text2);font-weight:600;font-size:14px;transition:all .2s;text-decoration:none;background:none;border:none;width:100%;text-align:left;cursor:pointer}
-#sidebar .nav-item:hover{background:var(--accent-dim);color:var(--accent)}
-#sidebar .nav-item.active{background:var(--accent-dim);color:var(--accent)}
-#sidebar .nav-item svg{width:18px;height:18px;flex-shrink:0}
-#sidebar .nav-item .nav-badge{margin-left:auto;background:var(--accent);color:#000;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px}
-#sidebar .sidebar-footer{padding-top:20px;border-top:1px solid var(--border)}
+    input,
+    button,
+    textarea,
+    select {
+      font-family: inherit
+    }
 
-/* Main content */
-#main{margin-left:260px;flex:1;min-height:100vh;display:flex;flex-direction:column}
-#topbar{
-  position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);
-  padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;
-  backdrop-filter:blur(20px);
-}
-#topbar h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text)}
-#content{padding:32px;flex:1}
+    button {
+      cursor: pointer;
+      border: none;
+      background: none
+    }
 
-/* Bottom nav (mobile) */
-#bottom-nav{
-  display:none;position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);
-  border-top:1px solid var(--border);backdrop-filter:blur(20px);
-  padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:100;
-  display:none;justify-content:space-around;
-}
-#bottom-nav .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;border-radius:12px;color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:none;border:none;cursor:pointer;transition:all .2s;min-width:60px}
-#bottom-nav .bnav-item svg{width:22px;height:22px}
-#bottom-nav .bnav-item.active{color:var(--accent)}
+    input,
+    textarea {
+      border: none;
+      outline: none
+    }
 
-/* Responsive */
-@media(max-width:768px){
-  #sidebar{display:none}
-  #main{margin-left:0}
-  #content{padding:20px 16px 90px}
-  #topbar{padding:0 16px;height:56px}
-  #bottom-nav{display:flex}
-  #topbar h1{font-size:17px}
-}
+    img {
+      max-width: 100%;
+      display: block
+    }
 
-/* ── COMPONENTS ───────────────────────────────────────────────────────────── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
-.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
-.inp{
-  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:12px 16px;color:var(--text);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;
-  transition:border-color .2s;
-}
-.inp:focus{border-color:var(--accent);outline:none}
-.inp::placeholder{color:var(--text3)}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:var(--radius);font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;transition:all .15s;cursor:pointer;border:none}
-.btn-primary{background:var(--accent);color:#0a0a14}
-.btn-primary:hover{filter:brightness(1.1)}
-.btn-dark{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
-.btn-dark:hover{border-color:var(--accent);color:var(--accent)}
-.btn-danger{background:var(--danger-dim);color:var(--danger);border:1px solid var(--danger)}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface2);color:var(--text2);flex-shrink:0;transition:all .2s;cursor:pointer}
-.btn-icon:hover{border-color:var(--accent);color:var(--accent)}
-.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.tag-green{background:var(--accent-dim);color:var(--accent-text)}
-.tag-red{background:var(--danger-dim);color:var(--danger)}
-.tag-muted{background:var(--surface2);color:var(--text2)}
-.section-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px}
-.section-sub{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:20px}
-.avatar{border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;color:#fff;flex-shrink:0}
-.divider{height:1px;background:var(--border);margin:16px 0}
-.modal-overlay{position:fixed;inset:0;background:#000000aa;backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s}
-.modal-sheet{position:fixed;inset:0;background:#000000aa;backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s}
-.modal-box{background:var(--surface);border-radius:var(--radius-xl);padding:28px;width:100%;max-width:440px;box-shadow:var(--shadow);animation:slideUp .25s}
-.modal-sheet-box{background:var(--surface);border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:28px 28px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:500px;animation:slideUp .25s;max-height:85vh;overflow-y:auto}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.flex{display:flex;align-items:center}
-.flex-between{display:flex;align-items:center;justify-content:space-between}
-.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
-.stack{display:flex;flex-direction:column}
-.stack-8{display:flex;flex-direction:column;gap:8px}
-.stack-12{display:flex;flex-direction:column;gap:12px}
-.stack-20{display:flex;flex-direction:column;gap:20px}
-.w-full{width:100%}
-.text-accent{color:var(--accent)}
-.text-muted{color:var(--text2)}
-.text-sm{font-size:13px}.text-xs{font-size:11px}.text-lg{font-size:18px}
-.font-bold{font-weight:700}.font-black{font-weight:800}
-.font-syne{font-family:'Syne',sans-serif}
-.upper{text-transform:uppercase;letter-spacing:.08em}
-.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    /* ── CSS VARIABLES / THEMES ───────────────────────────────────────────────── */
+    :root {
+      /* Dark theme (default) */
+      --bg: #0d0d14;
+      --surface: #141420;
+      --surface2: #1a1a2e;
+      --border: #ffffff0f;
+      --border2: #ffffff18;
+      --text: #f0f0ff;
+      --text2: #8888aa;
+      --text3: #44445a;
+      --accent: #00c896;
+      --accent-dim: #00c89618;
+      --accent-text: #00c896;
+      --danger: #ff4466;
+      --danger-dim: #ff446618;
+      --warn: #f59e0b;
+      --shadow: 0 8px 40px #00000055;
+      --shadow-accent: 0 8px 40px #00c89630;
+      --nav-bg: #0d0d14ee;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+    }
 
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    [data-theme="light"] {
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --surface2: #f0f0ea;
+      --border: #e8e8e0;
+      --border2: #d8d8d0;
+      --text: #1a1a2e;
+      --text2: #666688;
+      --text3: #aaaacc;
+      --accent: #00a87a;
+      --accent-dim: #00a87a15;
+      --accent-text: #007a58;
+      --danger: #e02050;
+      --danger-dim: #e0205015;
+      --warn: #d97706;
+      --shadow: 0 4px 24px #0000000a;
+      --shadow-accent: 0 8px 32px #00a87a25;
+      --nav-bg: #fffffff0;
+    }
 
-/* ── PAGE-SPECIFIC STYLES ─────────────────────────────────────────────────── */
-/* Login */
-#login-page{min-height:100vh;display:flex;align-items:stretch}
-.login-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;max-width:520px}
-.login-right{flex:1;background:var(--surface);border-left:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:40px;position:relative;overflow:hidden}
-.login-right-content{text-align:center;position:relative;z-index:1}
-.login-deco{position:absolute;width:400px;height:400px;border-radius:50%;background:var(--accent-dim);filter:blur(80px);top:50%;left:50%;transform:translate(-50%,-50%)}
-@media(max-width:768px){
-  #login-page{flex-direction:column}
-  .login-left{padding:40px 28px;max-width:100%}
-  .login-right{display:none}
-}
+    [data-theme="warm"] {
+      --bg: #1a1208;
+      --surface: #231a0a;
+      --surface2: #2e2010;
+      --border: #ffffff0a;
+      --border2: #ffffff15;
+      --text: #f5e6c8;
+      --text2: #9a7a50;
+      --text3: #5a4030;
+      --accent: #f0a030;
+      --accent-dim: #f0a03018;
+      --accent-text: #f0a030;
+      --danger: #e05030;
+      --danger-dim: #e0503018;
+      --warn: #f0a030;
+      --shadow: 0 8px 40px #00000066;
+      --shadow-accent: 0 8px 40px #f0a03030;
+      --nav-bg: #1a1208ee;
+    }
 
-/* Dashboard stats */
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
-.stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--text);line-height:1}
-.stat-label{font-size:12px;color:var(--text2);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
-.stat-icon{position:absolute;right:20px;top:20px;width:40px;height:40px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+    [data-theme="neon"] {
+      --bg: #020208;
+      --surface: #06060f;
+      --surface2: #0a0a18;
+      --border: #00ffcc08;
+      --border2: #00ffcc15;
+      --text: #d0d0ff;
+      --text2: #5050aa;
+      --text3: #2a2a5a;
+      --accent: #00ffcc;
+      --accent-dim: #00ffcc10;
+      --accent-text: #00ffcc;
+      --danger: #ff0066;
+      --danger-dim: #ff006615;
+      --warn: #ffaa00;
+      --shadow: 0 8px 60px #00000088;
+      --shadow-accent: 0 0 40px #00ffcc20;
+      --nav-bg: #020208f0;
+    }
 
-/* Session list */
-.session-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s}
-.session-row:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:var(--shadow)}
-.session-icon{width:48px;height:48px;border-radius:14px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+    /* ── LAYOUT ───────────────────────────────────────────────────────────────── */
+    #app {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .3s, color .3s;
+    }
 
-/* Menu item card */
-.menu-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
-.menu-item:hover{border-color:var(--border2)}
-.menu-emoji{width:52px;height:52px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+    /* Sidebar (desktop) */
+    #sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform .3s;
+    }
 
-/* Bill panel */
-.bill-panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
-.bill-header{padding:20px 24px;border-bottom:1px solid var(--border)}
-.bill-row{padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.bill-row:last-child{border-bottom:none}
-.bill-total{background:var(--accent);padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+    #sidebar .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      margin-bottom: 36px
+    }
 
-/* Tabs */
-.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius);padding:4px;margin-bottom:24px}
-.tab{flex:1;padding:8px 12px;border-radius:calc(var(--radius) - 4px);font-size:13px;font-weight:700;color:var(--text2);transition:all .2s;text-align:center;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif}
-.tab.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+    #sidebar .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0
+    }
 
-/* Badge grid */
-.badge-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;transition:all .2s}
-.badge-card.earned{border-color:var(--accent);background:var(--accent-dim)}
-.badge-card:not(.earned){opacity:.45}
-.badge-emoji{font-size:28px;margin-bottom:8px}
-.badge-name{font-size:12px;font-weight:700;color:var(--text)}
+    #sidebar .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.3px
+    }
 
-/* Theme picker */
-.theme-card{border-radius:var(--radius-lg);padding:16px;border:2px solid transparent;cursor:pointer;transition:all .2s;position:relative}
-.theme-card.active{border-color:var(--accent)}
-.theme-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+    #sidebar .logo-sub {
+      font-size: 10px;
+      color: var(--text2);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .1em
+    }
 
-/* Toast */
-#toast-container{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-@media(max-width:768px){#toast-container{top:auto;bottom:90px;right:12px;left:12px}}
-.toast{padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:fadeInUp .25s;pointer-events:auto}
-.toast-success{background:var(--surface);border:1px solid var(--accent);color:var(--text)}
-.toast-error{background:var(--surface);border:1px solid var(--danger);color:var(--text)}
+    #sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1
+    }
 
-/* Qty stepper */
-.qty-stepper{display:flex;align-items:center;gap:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.qty-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--text2);background:none;border:none;cursor:pointer;transition:color .15s}
-.qty-btn:hover{color:var(--accent)}
-.qty-num{width:28px;text-align:center;font-size:14px;font-weight:800;color:var(--text)}
+    #sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all .2s;
+      text-decoration: none;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer
+    }
 
-/* Empty state */
-.empty-state{text-align:center;padding:48px 20px;border:2px dashed var(--border);border-radius:var(--radius-xl)}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
-.empty-text{font-size:14px;font-weight:600;color:var(--text3);font-style:italic}
+    #sidebar .nav-item:hover {
+      background: var(--accent-dim);
+      color: var(--accent)
+    }
 
-/* Profile hero */
-.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:24px}
+    #sidebar .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent)
+    }
 
-/* Desktop session layout */
-@media(min-width:769px){
-  .session-layout{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
-}
+    #sidebar .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0
+    }
 
-/* Scrollbar */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+    #sidebar .nav-item .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 20px
+    }
 
-/* Install banner */
-#install-banner{display:none;background:var(--accent);color:#0a0a14;padding:12px 20px;font-size:13px;font-weight:700;align-items:center;gap:12px;position:sticky;top:0;z-index:200}
-#install-banner.show{display:flex}
-#install-banner button{background:rgba(0,0,0,.15);border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;color:#0a0a14;font-size:12px}
-#install-banner .close-banner{background:none;margin-left:auto;font-size:18px;line-height:1}
+    #sidebar .sidebar-footer {
+      padding-top: 20px;
+      border-top: 1px solid var(--border)
+    }
 
-/* Color picker */
-.color-swatch{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0}
-.color-swatch.active{border-color:var(--text)}
+    /* Main content */
+    #main {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column
+    }
 
-/* Join code input (large) */
-.code-input{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text);text-transform:uppercase;letter-spacing:.15em;width:100%;text-align:center;transition:border-color .2s}
-.code-input:focus{border-color:var(--accent)}
+    #topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+    }
 
-/* Locked/closed banner */
-.status-banner{border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px}
-.status-banner-locked{background:var(--danger-dim);border:1px solid var(--danger);color:var(--danger)}
-.status-banner-closed{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+    #topbar h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text)
+    }
 
-/* Emoji picker */
-.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
-.emoji-btn{padding:8px;border-radius:8px;font-size:16px;background:var(--surface2);border:2px solid transparent;cursor:pointer;transition:all .15s;text-align:center}
-.emoji-btn.active{border-color:var(--accent);background:var(--accent-dim)}
-@media(max-width:500px){.emoji-grid{grid-template-columns:repeat(6,1fr)}}
+    #content {
+      padding: 32px;
+      flex: 1
+    }
 
-/* Navigation label hidden on sm screens when icon only */
-</style>
+    /* Bottom nav (mobile) */
+    #bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--nav-bg);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+      display: none;
+      justify-content: space-around;
+    }
+
+    #bottom-nav .bnav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      color: var(--text3);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+      min-width: 60px
+    }
+
+    #bottom-nav .bnav-item svg {
+      width: 22px;
+      height: 22px
+    }
+
+    #bottom-nav .bnav-item.active {
+      color: var(--accent)
+    }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      #sidebar {
+        display: none
+      }
+
+      #main {
+        margin-left: 0
+      }
+
+      #content {
+        padding: 20px 16px 90px
+      }
+
+      #topbar {
+        padding: 0 16px;
+        height: 56px
+      }
+
+      #bottom-nav {
+        display: flex
+      }
+
+      #topbar h1 {
+        font-size: 17px
+      }
+    }
+
+    /* ── COMPONENTS ───────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow)
+    }
+
+    .card-sm {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius)
+    }
+
+    .inp {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color .2s;
+    }
+
+    .inp:focus {
+      border-color: var(--accent);
+      outline: none
+    }
+
+    .inp::placeholder {
+      color: var(--text3)
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s;
+      cursor: pointer;
+      border: none
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a14
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1)
+    }
+
+    .btn-dark {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border2)
+    }
+
+    .btn-dark:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .btn-danger {
+      background: var(--danger-dim);
+      color: var(--danger);
+      border: 1px solid var(--danger)
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text2);
+      flex-shrink: 0;
+      transition: all .2s;
+      cursor: pointer
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .tag-green {
+      background: var(--accent-dim);
+      color: var(--accent-text)
+    }
+
+    .tag-red {
+      background: var(--danger-dim);
+      color: var(--danger)
+    }
+
+    .tag-muted {
+      background: var(--surface2);
+      color: var(--text2)
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: var(--text2);
+      font-weight: 500;
+      margin-bottom: 20px
+    }
+
+    .avatar {
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000000aa;
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn .2s
+    }
+
+    .modal-sheet {
+      position: fixed;
+      inset: 0;
+      background: #000000aa;
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow);
+      animation: slideUp .25s
+    }
+
+    .modal-sheet-box {
+      background: var(--surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 28px 28px calc(28px + env(safe-area-inset-bottom));
+      width: 100%;
+      max-width: 500px;
+      animation: slideUp .25s;
+      max-height: 85vh;
+      overflow-y: auto
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px
+    }
+
+    .flex {
+      display: flex;
+      align-items: center
+    }
+
+    .flex-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .gap-8 {
+      gap: 8px
+    }
+
+    .gap-12 {
+      gap: 12px
+    }
+
+    .gap-16 {
+      gap: 16px
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column
+    }
+
+    .stack-8 {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .stack-12 {
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .stack-20 {
+      display: flex;
+      flex-direction: column;
+      gap: 20px
+    }
+
+    .w-full {
+      width: 100%
+    }
+
+    .text-accent {
+      color: var(--accent)
+    }
+
+    .text-muted {
+      color: var(--text2)
+    }
+
+    .text-sm {
+      font-size: 13px
+    }
+
+    .text-xs {
+      font-size: 11px
+    }
+
+    .text-lg {
+      font-size: 18px
+    }
+
+    .font-bold {
+      font-weight: 700
+    }
+
+    .font-black {
+      font-weight: 800
+    }
+
+    .font-syne {
+      font-family: 'Syne', sans-serif
+    }
+
+    .upper {
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── PAGE-SPECIFIC STYLES ─────────────────────────────────────────────────── */
+    /* Login */
+    #login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch
+    }
+
+    .login-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      max-width: 520px
+    }
+
+    .login-right {
+      flex: 1;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .login-right-content {
+      text-align: center;
+      position: relative;
+      z-index: 1
+    }
+
+    .login-deco {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      filter: blur(80px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%)
+    }
+
+    @media(max-width:768px) {
+      #login-page {
+        flex-direction: column
+      }
+
+      .login-left {
+        padding: 40px 28px;
+        max-width: 100%
+      }
+
+      .login-right {
+        display: none
+      }
+    }
+
+    /* Dashboard stats */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent)
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text2);
+      font-weight: 600;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .stat-icon {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent)
+    }
+
+    /* Session list */
+    .session-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .session-row:hover {
+      border-color: var(--border2);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow)
+    }
+
+    .session-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 22px
+    }
+
+    /* Menu item card */
+    .menu-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color .2s
+    }
+
+    .menu-item:hover {
+      border-color: var(--border2)
+    }
+
+    .menu-emoji {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0
+    }
+
+    /* Bill panel */
+    .bill-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden
+    }
+
+    .bill-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .bill-row {
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .bill-row:last-child {
+      border-bottom: none
+    }
+
+    .bill-total {
+      background: var(--accent);
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 24px
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: calc(var(--radius) - 4px);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text2);
+      transition: all .2s;
+      text-align: center;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif
+    }
+
+    .tab.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: var(--shadow)
+    }
+
+    /* Badge grid */
+    .badge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      text-align: center;
+      transition: all .2s
+    }
+
+    .badge-card.earned {
+      border-color: var(--accent);
+      background: var(--accent-dim)
+    }
+
+    .badge-card:not(.earned) {
+      opacity: .45
+    }
+
+    .badge-emoji {
+      font-size: 28px;
+      margin-bottom: 8px
+    }
+
+    .badge-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    /* Theme picker */
+    .theme-card {
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative
+    }
+
+    .theme-card.active {
+      border-color: var(--accent)
+    }
+
+    .theme-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none
+    }
+
+    @media(max-width:768px) {
+      #toast-container {
+        top: auto;
+        bottom: 90px;
+        right: 12px;
+        left: 12px
+      }
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      animation: fadeInUp .25s;
+      pointer-events: auto
+    }
+
+    .toast-success {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--text)
+    }
+
+    .toast-error {
+      background: var(--surface);
+      border: 1px solid var(--danger);
+      color: var(--text)
+    }
+
+    /* Qty stepper */
+    .qty-stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden
+    }
+
+    .qty-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text2);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color .15s
+    }
+
+    .qty-btn:hover {
+      color: var(--accent)
+    }
+
+    .qty-num {
+      width: 28px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text)
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-xl)
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: .5
+    }
+
+    .empty-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text3);
+      font-style: italic
+    }
+
+    /* Profile hero */
+    .profile-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      margin-bottom: 24px
+    }
+
+    /* Desktop session layout */
+    @media(min-width:769px) {
+      .session-layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        align-items: start
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text3)
+    }
+
+    /* Install banner */
+    #install-banner {
+      display: none;
+      background: var(--accent);
+      color: #0a0a14;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 200
+    }
+
+    #install-banner.show {
+      display: flex
+    }
+
+    #install-banner button {
+      background: rgba(0, 0, 0, .15);
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #0a0a14;
+      font-size: 12px
+    }
+
+    #install-banner .close-banner {
+      background: none;
+      margin-left: auto;
+      font-size: 18px;
+      line-height: 1
+    }
+
+    /* Color picker */
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .color-swatch.active {
+      border-color: var(--text)
+    }
+
+    /* Join code input (large) */
+    .code-input {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      font-size: 22px;
+      font-weight: 800;
+      font-family: 'Syne', sans-serif;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      width: 100%;
+      text-align: center;
+      transition: border-color .2s
+    }
+
+    .code-input:focus {
+      border-color: var(--accent)
+    }
+
+    /* Locked/closed banner */
+    .status-banner {
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .status-banner-locked {
+      background: var(--danger-dim);
+      border: 1px solid var(--danger);
+      color: var(--danger)
+    }
+
+    .status-banner-closed {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text2)
+    }
+
+    /* Emoji picker */
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px
+    }
+
+    .emoji-btn {
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 16px;
+      background: var(--surface2);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center
+    }
+
+    .emoji-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-dim)
+    }
+
+    @media(max-width:500px) {
+      .emoji-grid {
+        grid-template-columns: repeat(6, 1fr)
+      }
+    }
+
+    /* Navigation label hidden on sm screens when icon only */
+  </style>
 </head>
+
 <body>
-<div id="app"></div>
-<div id="toast-container"></div>
+  <div id="app"></div>
+  <div id="toast-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
-// 👉 Replace these two values with your own from Supabase → Settings → API
-const SUPABASE_URL     = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+    // 👉 Replace these two values with your own from Supabase → Settings → API
+    const SUPABASE_URL = 'https://ijomccrisaffrrlbonuk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlqb21jY3Jpc2FmZnJybGJvbnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTI0NDcsImV4cCI6MjA5MDA2ODQ0N30.UGJj1gBn3bxMjxKuROW01Wb40oprpoaxjD_Y2Az1C7k';
 
-let _db = null;
-function getDB(){
-  if(!_db && SUPABASE_URL !== 'YOUR_SUPABASE_URL'){
-    _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _db;
-}
+    let _db = null;
+    function getDB() {
+      if (!_db && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+        _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+      return _db;
+    }
 
-// ── DB HELPERS (Supabase-backed, falls back to localStorage if not configured) ─
-const DB = {
-  async loadAll(){
-    const db = getDB();
-    if(!db) return false; // use localStorage fallback
-    try {
-      const [users, shops, sessions, orders] = await Promise.all([
-        db.from('users').select('*'),
-        db.from('shops').select('*'),
-        db.from('sessions').select('*'),
-        db.from('orders').select('*'),
-      ]);
-      state.users    = (users.data||[]).map(u=>({id:u.id,username:u.username,password:u.password,role:u.role,joined:u.joined,avatarColor:u.avatar_color,bio:u.bio,theme:u.theme}));
-      state.shops    = (shops.data||[]).map(s=>({id:s.id,name:s.name,address:s.address,creatorId:s.creator_id,menu:s.menu||[]}));
-      state.sessions = (sessions.data||[]).map(s=>({id:s.id,shopId:s.shop_id,creatorId:s.creator_id,location:s.location,locked:s.locked,closed:s.closed}));
-      state.orders   = (orders.data||[]).map(o=>({id:o.id,sessionId:o.session_id,userId:o.user_id,userName:o.user_name,itemId:o.item_id,itemName:o.item_name,price:o.price,quantity:o.quantity,note:o.note}));
-      return true;
-    } catch(e){ console.warn('Supabase load failed, using localStorage', e); return false; }
-  },
+    // ── DB HELPERS (Supabase-backed, falls back to localStorage if not configured) ─
+    const DB = {
+      async loadAll() {
+        const db = getDB();
+        if (!db) return false; // use localStorage fallback
+        try {
+          const [users, shops, sessions, orders] = await Promise.all([
+            db.from('users').select('*'),
+            db.from('shops').select('*'),
+            db.from('sessions').select('*'),
+            db.from('orders').select('*'),
+          ]);
+          state.users = (users.data || []).map(u => ({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatarColor: u.avatar_color, bio: u.bio, theme: u.theme }));
+          state.shops = (shops.data || []).map(s => ({ id: s.id, name: s.name, address: s.address, creatorId: s.creator_id, menu: s.menu || [] }));
+          state.sessions = (sessions.data || []).map(s => ({ id: s.id, shopId: s.shop_id, creatorId: s.creator_id, location: s.location, locked: s.locked, closed: s.closed }));
+          state.orders = (orders.data || []).map(o => ({ id: o.id, sessionId: o.session_id, userId: o.user_id, userName: o.user_name, itemId: o.item_id, itemName: o.item_name, price: o.price, quantity: o.quantity, note: o.note }));
+          return true;
+        } catch (e) { console.warn('Supabase load failed, using localStorage', e); return false; }
+      },
 
-  async upsertUser(u){
-    const db=getDB(); if(!db) return;
-    await db.from('users').upsert({id:u.id,username:u.username,password:u.password,role:u.role,joined:u.joined,avatar_color:u.avatarColor,bio:u.bio||'',theme:u.theme||'dark'});
-  },
-  async upsertShop(s){
-    const db=getDB(); if(!db) return;
-    await db.from('shops').upsert({id:s.id,name:s.name,address:s.address,creator_id:s.creatorId,menu:s.menu});
-  },
-  async deleteShop(id){
-    const db=getDB(); if(!db) return;
-    await db.from('shops').delete().eq('id',id);
-  },
-  async upsertSession(s){
-    const db=getDB(); if(!db) return;
-    await db.from('sessions').upsert({id:s.id,shop_id:s.shopId,creator_id:s.creatorId,location:s.location,locked:s.locked||false,closed:s.closed||false});
-  },
-  async upsertOrder(o){
-    const db=getDB(); if(!db) return;
-    await db.from('orders').upsert({id:o.id,session_id:o.sessionId,user_id:o.userId,user_name:o.userName,item_id:o.itemId,item_name:o.itemName,price:o.price,quantity:o.quantity,note:o.note||''});
-  },
-  async deleteOrder(id){
-    const db=getDB(); if(!db) return;
-    await db.from('orders').delete().eq('id',id);
-  },
-};
+      async upsertUser(u) {
+        const db = getDB(); if (!db) return;
+        await db.from('users').upsert({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatar_color: u.avatarColor, bio: u.bio || '', theme: u.theme || 'dark' });
+      },
+      async upsertShop(s) {
+        const db = getDB(); if (!db) return;
+        await db.from('shops').upsert({ id: s.id, name: s.name, address: s.address, creator_id: s.creatorId, menu: s.menu });
+      },
+      async deleteShop(id) {
+        const db = getDB(); if (!db) return;
+        await db.from('shops').delete().eq('id', id);
+      },
+      async upsertSession(s) {
+        const db = getDB(); if (!db) return;
+        await db.from('sessions').upsert({ id: s.id, shop_id: s.shopId, creator_id: s.creatorId, location: s.location, locked: s.locked || false, closed: s.closed || false });
+      },
+      async upsertOrder(o) {
+        const db = getDB(); if (!db) return;
+        await db.from('orders').upsert({ id: o.id, session_id: o.sessionId, user_id: o.userId, user_name: o.userName, item_id: o.itemId, item_name: o.itemName, price: o.price, quantity: o.quantity, note: o.note || '' });
+      },
+      async deleteOrder(id) {
+        const db = getDB(); if (!db) return;
+        await db.from('orders').delete().eq('id', id);
+      },
+    };
 
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
-const SK = {SHOPS:'tr8_shops',SESSIONS:'tr8_sessions',ORDERS:'tr8_orders',USERS:'tr8_users',AUTH:'tr8_auth',THEME:'tr8_theme'};
-const FOOD_EMOJIS = ['🍵','☕','🥤','🧋','🥐','🍰','🍩','🍪','🥪','🍕','🥨','🧁','🫖','🍫','🥛','🧃','🫗','🥮','🥞','🧇'];
-const AVATAR_COLORS = ['#00c896','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
-const THEMES = {
-  dark:{name:'Dark',bg:'#0d0d14',surface:'#141420',surface2:'#1a1a2e',border:'#ffffff0f',border2:'#ffffff18',text:'#f0f0ff',text2:'#8888aa',text3:'#44445a',accent:'#00c896','accent-dim':'#00c89618','accent-text':'#00c896',danger:'#ff4466','danger-dim':'#ff446618',shadow:'0 8px 40px #00000055','shadow-accent':'0 8px 40px #00c89630','nav-bg':'#0d0d14ee'},
-  light:{name:'Light',bg:'#f5f5f0',surface:'#ffffff',surface2:'#f0f0ea',border:'#e8e8e0',border2:'#d8d8d0',text:'#1a1a2e',text2:'#666688',text3:'#aaaacc',accent:'#00a87a','accent-dim':'#00a87a15','accent-text':'#007a58',danger:'#e02050','danger-dim':'#e0205015',shadow:'0 4px 24px #0000000a','shadow-accent':'0 8px 32px #00a87a25','nav-bg':'#fffffff0'},
-  warm:{name:'Warm',bg:'#1a1208',surface:'#231a0a',surface2:'#2e2010',border:'#ffffff0a',border2:'#ffffff15',text:'#f5e6c8',text2:'#9a7a50',text3:'#5a4030',accent:'#f0a030','accent-dim':'#f0a03018','accent-text':'#f0a030',danger:'#e05030','danger-dim':'#e0503018',shadow:'0 8px 40px #00000066','shadow-accent':'0 8px 40px #f0a03030','nav-bg':'#1a1208ee'},
-  neon:{name:'Neon',bg:'#020208',surface:'#06060f',surface2:'#0a0a18',border:'#00ffcc08',border2:'#00ffcc15',text:'#d0d0ff',text2:'#5050aa',text3:'#2a2a5a',accent:'#00ffcc','accent-dim':'#00ffcc10','accent-text':'#00ffcc',danger:'#ff0066','danger-dim':'#ff006615',shadow:'0 8px 60px #00000088','shadow-accent':'0 0 40px #00ffcc20','nav-bg':'#020208f0'},
-};
-const BADGES = [
-  {id:'first_order',label:'First Order',icon:'🎯',cond:s=>s.totalOrders>=1},
-  {id:'veteran',label:'Veteran',icon:'⭐',cond:s=>s.totalOrders>=10},
-  {id:'host',label:'Round Host',icon:'🎤',cond:s=>s.roundsHosted>=1},
-  {id:'serial_host',label:'Serial Host',icon:'👑',cond:s=>s.roundsHosted>=5},
-  {id:'shopkeeper',label:'Shopkeeper',icon:'🏪',cond:s=>s.shopsCreated>=1},
-  {id:'big_spender',label:'Big Spender',icon:'💰',cond:s=>s.totalSpent>=500},
-];
+    // ── CONSTANTS ────────────────────────────────────────────────────────────────
+    const SK = { SHOPS: 'tr8_shops', SESSIONS: 'tr8_sessions', ORDERS: 'tr8_orders', USERS: 'tr8_users', AUTH: 'tr8_auth', THEME: 'tr8_theme' };
+    const FOOD_EMOJIS = ['🍵', '☕', '🥤', '🧋', '🥐', '🍰', '🍩', '🍪', '🥪', '🍕', '🥨', '🧁', '🫖', '🍫', '🥛', '🧃', '🫗', '🥮', '🥞', '🧇'];
+    const AVATAR_COLORS = ['#00c896', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
+    const THEMES = {
+      dark: { name: 'Dark', bg: '#0d0d14', surface: '#141420', surface2: '#1a1a2e', border: '#ffffff0f', border2: '#ffffff18', text: '#f0f0ff', text2: '#8888aa', text3: '#44445a', accent: '#00c896', 'accent-dim': '#00c89618', 'accent-text': '#00c896', danger: '#ff4466', 'danger-dim': '#ff446618', shadow: '0 8px 40px #00000055', 'shadow-accent': '0 8px 40px #00c89630', 'nav-bg': '#0d0d14ee' },
+      light: { name: 'Light', bg: '#f5f5f0', surface: '#ffffff', surface2: '#f0f0ea', border: '#e8e8e0', border2: '#d8d8d0', text: '#1a1a2e', text2: '#666688', text3: '#aaaacc', accent: '#00a87a', 'accent-dim': '#00a87a15', 'accent-text': '#007a58', danger: '#e02050', 'danger-dim': '#e0205015', shadow: '0 4px 24px #0000000a', 'shadow-accent': '0 8px 32px #00a87a25', 'nav-bg': '#fffffff0' },
+      warm: { name: 'Warm', bg: '#1a1208', surface: '#231a0a', surface2: '#2e2010', border: '#ffffff0a', border2: '#ffffff15', text: '#f5e6c8', text2: '#9a7a50', text3: '#5a4030', accent: '#f0a030', 'accent-dim': '#f0a03018', 'accent-text': '#f0a030', danger: '#e05030', 'danger-dim': '#e0503018', shadow: '0 8px 40px #00000066', 'shadow-accent': '0 8px 40px #f0a03030', 'nav-bg': '#1a1208ee' },
+      neon: { name: 'Neon', bg: '#020208', surface: '#06060f', surface2: '#0a0a18', border: '#00ffcc08', border2: '#00ffcc15', text: '#d0d0ff', text2: '#5050aa', text3: '#2a2a5a', accent: '#00ffcc', 'accent-dim': '#00ffcc10', 'accent-text': '#00ffcc', danger: '#ff0066', 'danger-dim': '#ff006615', shadow: '0 8px 60px #00000088', 'shadow-accent': '0 0 40px #00ffcc20', 'nav-bg': '#020208f0' },
+    };
+    const BADGES = [
+      { id: 'first_order', label: 'First Order', icon: '🎯', cond: s => s.totalOrders >= 1 },
+      { id: 'veteran', label: 'Veteran', icon: '⭐', cond: s => s.totalOrders >= 10 },
+      { id: 'host', label: 'Round Host', icon: '🎤', cond: s => s.roundsHosted >= 1 },
+      { id: 'serial_host', label: 'Serial Host', icon: '👑', cond: s => s.roundsHosted >= 5 },
+      { id: 'shopkeeper', label: 'Shopkeeper', icon: '🏪', cond: s => s.shopsCreated >= 1 },
+      { id: 'big_spender', label: 'Big Spender', icon: '💰', cond: s => s.totalSpent >= 500 },
+    ];
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-let state = {
-  view:'login',user:null,theme:'dark',
-  shops:[],sessions:[],orders:[],users:[],
-  activeSessionId:null,activeShopId:null,
-  modal:null, // {type, data}
-};
+    // ── STATE ────────────────────────────────────────────────────────────────────
+    let state = {
+      view: 'login', user: null, theme: 'dark',
+      shops: [], sessions: [], orders: [], users: [],
+      activeSessionId: null, activeShopId: null,
+      modal: null, // {type, data}
+    };
 
-function loadFromLocalStorage(){
-  const g=(k,fb)=>{try{return JSON.parse(localStorage.getItem(k)||fb)}catch{return JSON.parse(fb)}};
-  state.shops=g(SK.SHOPS,'[]');
-  state.sessions=g(SK.SESSIONS,'[]');
-  state.orders=g(SK.ORDERS,'[]');
-  state.users=g(SK.USERS,'[]');
-}
-async function load(){
-  const g=(k,fb)=>{try{return JSON.parse(localStorage.getItem(k)||fb)}catch{return JSON.parse(fb)}};
-  state.theme=localStorage.getItem(SK.THEME)||'dark';
-  const auth=g(SK.AUTH,'null');
-  if(auth){state.user=auth;state.view='home';}
-  applyTheme(state.theme);
-  render(); // render immediately with localStorage data
-  const usedDB = await DB.loadAll();
-  if(!usedDB){ loadFromLocalStorage(); }
-  else { localStorage.setItem(SK.AUTH,JSON.stringify(state.user)); } // keep auth in localStorage
-  render(); // re-render with DB data
-}
-function save(){
-  // Always persist auth + theme locally; data synced to DB per-operation
-  localStorage.setItem(SK.AUTH,JSON.stringify(state.user));
-  localStorage.setItem(SK.THEME,state.theme);
-  // localStorage mirror (offline fallback)
-  localStorage.setItem(SK.SHOPS,JSON.stringify(state.shops));
-  localStorage.setItem(SK.SESSIONS,JSON.stringify(state.sessions));
-  localStorage.setItem(SK.ORDERS,JSON.stringify(state.orders));
-  localStorage.setItem(SK.USERS,JSON.stringify(state.users));
-}
-function setState(patch){
-  Object.assign(state,patch);
-  save();
-  render();
-}
-const gid=()=>Math.random().toString(36).substr(2,6).toUpperCase();
+    function loadFromLocalStorage() {
+      const g = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb) } catch { return JSON.parse(fb) } };
+      state.shops = g(SK.SHOPS, '[]');
+      state.sessions = g(SK.SESSIONS, '[]');
+      state.orders = g(SK.ORDERS, '[]');
+      state.users = g(SK.USERS, '[]');
+    }
+    async function load() {
+      const g = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb) } catch { return JSON.parse(fb) } };
+      state.theme = localStorage.getItem(SK.THEME) || 'dark';
+      const auth = g(SK.AUTH, 'null');
+      if (auth) { state.user = auth; state.view = 'home'; }
+      applyTheme(state.theme);
+      render(); // render immediately with localStorage data
+      const usedDB = await DB.loadAll();
+      if (!usedDB) { loadFromLocalStorage(); }
+      else { localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); } // keep auth in localStorage
+      render(); // re-render with DB data
+    }
+    function save() {
+      // Always persist auth + theme locally; data synced to DB per-operation
+      localStorage.setItem(SK.AUTH, JSON.stringify(state.user));
+      localStorage.setItem(SK.THEME, state.theme);
+      // localStorage mirror (offline fallback)
+      localStorage.setItem(SK.SHOPS, JSON.stringify(state.shops));
+      localStorage.setItem(SK.SESSIONS, JSON.stringify(state.sessions));
+      localStorage.setItem(SK.ORDERS, JSON.stringify(state.orders));
+      localStorage.setItem(SK.USERS, JSON.stringify(state.users));
+    }
+    function setState(patch) {
+      Object.assign(state, patch);
+      save();
+      render();
+    }
+    const gid = () => Math.random().toString(36).substr(2, 6).toUpperCase();
 
-// ── THEME ────────────────────────────────────────────────────────────────────
-function applyTheme(name){
-  const t=THEMES[name]||THEMES.dark;
-  document.documentElement.setAttribute('data-theme',name==='dark'?'':name);
-  const r=document.documentElement.style;
-  Object.entries(t).forEach(([k,v])=>{
-    if(!['name'].includes(k))r.setProperty('--'+k,v);
-  });
-  // special: dark sets no data-theme attr since css default is dark
-  if(name==='dark'){document.documentElement.removeAttribute('data-theme');}
-  else{document.documentElement.setAttribute('data-theme',name);}
-}
+    // ── THEME ────────────────────────────────────────────────────────────────────
+    function applyTheme(name) {
+      const t = THEMES[name] || THEMES.dark;
+      document.documentElement.setAttribute('data-theme', name === 'dark' ? '' : name);
+      const r = document.documentElement.style;
+      Object.entries(t).forEach(([k, v]) => {
+        if (!['name'].includes(k)) r.setProperty('--' + k, v);
+      });
+      // special: dark sets no data-theme attr since css default is dark
+      if (name === 'dark') { document.documentElement.removeAttribute('data-theme'); }
+      else { document.documentElement.setAttribute('data-theme', name); }
+    }
 
-// ── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg,type='success'){
-  const c=document.getElementById('toast-container');
-  const el=document.createElement('div');
-  el.className=`toast toast-${type}`;
-  el.innerHTML=`<span>${type==='success'?'✓':'✕'}</span>${msg}`;
-  c.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)},2500);
-}
+    // ── TOAST ────────────────────────────────────────────────────────────────────
+    function toast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span>${msg}`;
+      c.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300) }, 2500);
+    }
 
-// ── AUTH ─────────────────────────────────────────────────────────────────────
-function handleAuth(username,password,isReg){
-  if(!username.trim()||!password.trim()){toast('Fill all fields','error');return;}
-  if(isReg){
-    if(state.users.find(u=>u.username===username)){toast('Username taken','error');return;}
-    const nu={id:gid(),username:username.trim(),password,role:state.users.length===0?'admin':'user',
-      joined:new Date().toLocaleDateString(),avatarColor:AVATAR_COLORS[Math.floor(Math.random()*AVATAR_COLORS.length)],bio:'',theme:'dark'};
-    state.users.push(nu);state.user=nu;
-    DB.upsertUser(nu); // sync to Supabase
-    toast('Account created! Welcome 🎉');
-  } else {
-    const found=state.users.find(u=>u.username===username&&u.password===password);
-    if(!found){toast('Incorrect credentials','error');return;}
-    state.user=found;
-    if(found.theme)setState({theme:found.theme});
-    toast(`Welcome back, ${found.username}!`);
-  }
-  setState({view:'home'});
-}
+    // ── AUTH ─────────────────────────────────────────────────────────────────────
+    function handleAuth(username, password, isReg) {
+      if (!username.trim() || !password.trim()) { toast('Fill all fields', 'error'); return; }
+      if (isReg) {
+        if (state.users.find(u => u.username === username)) { toast('Username taken', 'error'); return; }
+        const nu = {
+          id: gid(), username: username.trim(), password, role: state.users.length === 0 ? 'admin' : 'user',
+          joined: new Date().toLocaleDateString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], bio: '', theme: 'dark'
+        };
+        state.users.push(nu); state.user = nu;
+        DB.upsertUser(nu); // sync to Supabase
+        toast('Account created! Welcome 🎉');
+      } else {
+        const found = state.users.find(u => u.username === username && u.password === password);
+        if (!found) { toast('Incorrect credentials', 'error'); return; }
+        state.user = found;
+        if (found.theme) setState({ theme: found.theme });
+        toast(`Welcome back, ${found.username}!`);
+      }
+      setState({ view: 'home' });
+    }
 
-function updateUser(patch){
-  Object.assign(state.user,patch);
-  state.users=state.users.map(u=>u.id===state.user.id?{...u,...patch}:u);
-}
+    function updateUser(patch) {
+      Object.assign(state.user, patch);
+      state.users = state.users.map(u => u.id === state.user.id ? { ...u, ...patch } : u);
+    }
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-const getSession=()=>state.sessions.find(s=>s.id===state.activeSessionId);
-const getSessionShop=()=>state.shops.find(s=>s.id===getSession()?.shopId);
-const getSessionOrders=()=>state.orders.filter(o=>o.sessionId===state.activeSessionId);
+    // ── HELPERS ──────────────────────────────────────────────────────────────────
+    const getSession = () => state.sessions.find(s => s.id === state.activeSessionId);
+    const getSessionShop = () => state.shops.find(s => s.id === getSession()?.shopId);
+    const getSessionOrders = () => state.orders.filter(o => o.sessionId === state.activeSessionId);
 
-function svgIcon(name,size=18,extra=''){
-  const icons={
-    home:`<polyline points="3 9 12 2 21 9"/><path d="M5 9v11h6v-6h2v6h6V9"/>`,
-    store:`<path d="M2 3h20l-2 7H4L2 3z"/><path d="M4 10v11h16V10"/><path d="M9 21v-6h6v6"/>`,
-    user:`<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/>`,
-    plus:`<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
-    trash:`<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>`,
-    download:`<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>`,
-    upload:`<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>`,
-    share:`<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>`,
-    copy:`<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`,
-    lock:`<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>`,
-    unlock:`<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/>`,
-    arrow_right:`<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
-    chevron_left:`<polyline points="15 18 9 12 15 6"/>`,
-    chevron_right:`<polyline points="9 18 15 12 9 6"/>`,
-    chevron_down:`<polyline points="6 9 12 15 18 9"/>`,
-    zap:`<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
-    coffee:`<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>`,
-    logout:`<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>`,
-    edit:`<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>`,
-    check:`<polyline points="20 6 9 17 4 12"/>`,
-    x:`<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
-    eye:`<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`,
-    eye_off:`<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`,
-    shield:`<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
-    bar_chart:`<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,
-    clock:`<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
-    calculator:`<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/>`,
-    palette:`<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>`,
-    map_pin:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>`,
-    file_code:`<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="10" y1="13" x2="8" y2="15"/><line x1="14" y1="13" x2="16" y2="15"/><line x1="10" y1="15" x2="14" y2="13"/>`,
-    bell:`<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>`,
-    package:`<path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.78 0l-8-4a2 2 0 01-1.11-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/>`,
-    refresh:`<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>`,
-    sun:`<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`,
-    moon:`<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`,
-    flame:`<path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-3.5-.93"/>`,
-    cpu:`<rect x="9" y="9" width="6" height="6"/><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="9" y1="2" x2="9" y2="9"/><line x1="15" y1="2" x2="15" y2="9"/><line x1="9" y1="15" x2="9" y2="22"/><line x1="15" y1="15" x2="15" y2="22"/><line x1="2" y1="9" x2="9" y2="9"/><line x1="2" y1="15" x2="9" y2="15"/><line x1="15" y1="9" x2="22" y2="9"/><line x1="15" y1="15" x2="22" y2="15"/>`,
-    trending_up:`<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
-  };
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}><title>${name}</title>${icons[name]||''}</svg>`;
-}
+    function svgIcon(name, size = 18, extra = '') {
+      const icons = {
+        home: `<polyline points="3 9 12 2 21 9"/><path d="M5 9v11h6v-6h2v6h6V9"/>`,
+        store: `<path d="M2 3h20l-2 7H4L2 3z"/><path d="M4 10v11h16V10"/><path d="M9 21v-6h6v6"/>`,
+        user: `<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/>`,
+        plus: `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+        trash: `<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>`,
+        download: `<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>`,
+        upload: `<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>`,
+        share: `<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>`,
+        copy: `<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`,
+        lock: `<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>`,
+        unlock: `<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/>`,
+        arrow_right: `<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
+        chevron_left: `<polyline points="15 18 9 12 15 6"/>`,
+        chevron_right: `<polyline points="9 18 15 12 9 6"/>`,
+        chevron_down: `<polyline points="6 9 12 15 18 9"/>`,
+        zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
+        coffee: `<path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>`,
+        logout: `<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>`,
+        edit: `<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>`,
+        check: `<polyline points="20 6 9 17 4 12"/>`,
+        x: `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
+        eye: `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`,
+        eye_off: `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`,
+        shield: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
+        bar_chart: `<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,
+        clock: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+        calculator: `<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/>`,
+        palette: `<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>`,
+        map_pin: `<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>`,
+        file_code: `<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="10" y1="13" x2="8" y2="15"/><line x1="14" y1="13" x2="16" y2="15"/><line x1="10" y1="15" x2="14" y2="13"/>`,
+        bell: `<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>`,
+        package: `<path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.78 0l-8-4a2 2 0 01-1.11-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/>`,
+        refresh: `<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>`,
+        sun: `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`,
+        moon: `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`,
+        flame: `<path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-3.5-.93"/>`,
+        cpu: `<rect x="9" y="9" width="6" height="6"/><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="9" y1="2" x2="9" y2="9"/><line x1="15" y1="2" x2="15" y2="9"/><line x1="9" y1="15" x2="9" y2="22"/><line x1="15" y1="15" x2="15" y2="22"/><line x1="2" y1="9" x2="9" y2="9"/><line x1="2" y1="15" x2="9" y2="15"/><line x1="15" y1="9" x2="22" y2="9"/><line x1="15" y1="15" x2="22" y2="15"/>`,
+        trending_up: `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
+      };
+      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}><title>${name}</title>${icons[name] || ''}</svg>`;
+    }
 
-function avatarHtml(u,size=40,radius=12){
-  const c=u?.avatarColor||AVATAR_COLORS[0];
-  const fs=Math.round(size*.38);
-  return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:${c};font-size:${fs}px">${(u?.username||'?')[0].toUpperCase()}</div>`;
-}
+    function avatarHtml(u, size = 40, radius = 12) {
+      const c = u?.avatarColor || AVATAR_COLORS[0];
+      const fs = Math.round(size * .38);
+      return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:${c};font-size:${fs}px">${(u?.username || '?')[0].toUpperCase()}</div>`;
+    }
 
-// ── EXPORT / IMPORT ──────────────────────────────────────────────────────────
-function exportShop(shop){
-  const data=JSON.stringify({name:shop.name,address:shop.address,menu:shop.menu.map(({name,price,emoji})=>({name,price,emoji}))},null,2);
-  const blob=new Blob([data],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`TeaRound_${shop.name.replace(/\s+/g,'_')}.json`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  navigator.clipboard.writeText(data).catch(()=>{});
-  toast(`${shop.name} exported!`);
-}
+    // ── EXPORT / IMPORT ──────────────────────────────────────────────────────────
+    function exportShop(shop) {
+      const data = JSON.stringify({ name: shop.name, address: shop.address, menu: shop.menu.map(({ name, price, emoji }) => ({ name, price, emoji })) }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `TeaRound_${shop.name.replace(/\s+/g, '_')}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      navigator.clipboard.writeText(data).catch(() => { });
+      toast(`${shop.name} exported!`);
+    }
 
-function importShop(json){
-  try{
-    const data=JSON.parse(json);
-    if(!data.name||!Array.isArray(data.menu))throw new Error();
-    const s={id:gid(),name:data.name,address:data.address||'Imported',menu:data.menu.map(m=>({...m,id:gid()})),creatorId:state.user.id};
-    state.shops.push(s);setState({modal:null});
-    toast(`Imported ${s.name}!`);
-  }catch{toast('Invalid JSON format','error');}
-}
+    function importShop(json) {
+      try {
+        const data = JSON.parse(json);
+        if (!data.name || !Array.isArray(data.menu)) throw new Error();
+        const s = { id: gid(), name: data.name, address: data.address || 'Imported', menu: data.menu.map(m => ({ ...m, id: gid() })), creatorId: state.user.id };
+        state.shops.push(s); setState({ modal: null });
+        toast(`Imported ${s.name}!`);
+      } catch { toast('Invalid JSON format', 'error'); }
+    }
 
-function downloadSummary(){
-  const session=getSession(),shop=getSessionShop(),so=getSessionOrders();
-  const agg=Object.entries(so.reduce((a,o)=>{a[o.itemName]=(a[o.itemName]||0)+o.quantity;return a},{}));
-  const total=so.reduce((a,o)=>a+o.price*o.quantity,0);
-  let c=`TEA ROUND SUMMARY\nID: ${session?.id}\nShop: ${shop?.name}\nLocation: ${session?.location}\nDate: ${new Date().toLocaleString()}\n${'─'.repeat(32)}\n\nGROUP TOTALS:\n`;
-  agg.forEach(([n,q])=>{c+=`  • ${n}: ×${q}\n`;});
-  c+=`\nBILL: ₹${total}\n\nINDIVIDUAL ORDERS:\n`;
-  so.forEach(o=>{c+=`  • ${o.userName}: ${o.itemName} ×${o.quantity} = ₹${o.price*o.quantity}\n`;});
-  const blob=new Blob([c],{type:'text/plain'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download=`TeaRound_${state.activeSessionId}.txt`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  toast('Summary downloaded!');
-}
+    function downloadSummary() {
+      const session = getSession(), shop = getSessionShop(), so = getSessionOrders();
+      const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
+      const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
+      let c = `TEA ROUND SUMMARY\nID: ${session?.id}\nShop: ${shop?.name}\nLocation: ${session?.location}\nDate: ${new Date().toLocaleString()}\n${'─'.repeat(32)}\n\nGROUP TOTALS:\n`;
+      agg.forEach(([n, q]) => { c += `  • ${n}: ×${q}\n`; });
+      c += `\nBILL: ₹${total}\n\nINDIVIDUAL ORDERS:\n`;
+      so.forEach(o => { c += `  • ${o.userName}: ${o.itemName} ×${o.quantity} = ₹${o.price * o.quantity}\n`; });
+      const blob = new Blob([c], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = `TeaRound_${state.activeSessionId}.txt`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      toast('Summary downloaded!');
+    }
 
-// ── RENDER PAGES ─────────────────────────────────────────────────────────────
-function renderLogin(){
-  const isReg=state._loginReg||false;
-  return `
+    // ── RENDER PAGES ─────────────────────────────────────────────────────────────
+    function renderLogin() {
+      const isReg = state._loginReg || false;
+      return `
   <div id="login-page">
     <div class="login-left">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:48px">
@@ -569,24 +1560,24 @@ function renderLogin(){
         </div>
       </div>
       <h1 class="font-syne" style="font-size:36px;font-weight:800;color:var(--text);line-height:1.1;margin-bottom:10px">
-        ${isReg?'Create your<br>account':'Welcome<br>back'}
+        ${isReg ? 'Create your<br>account' : 'Welcome<br>back'}
       </h1>
       <p class="text-muted" style="margin-bottom:36px;font-size:15px">
-        ${isReg?'Join your team on TeaRound Pro':'Sign in to manage your rounds'}
+        ${isReg ? 'Join your team on TeaRound Pro' : 'Sign in to manage your rounds'}
       </p>
       <div class="stack-12">
-        <input id="auth-name" class="inp" placeholder="Username" autocomplete="username" value="${state._loginName||''}"/>
+        <input id="auth-name" class="inp" placeholder="Username" autocomplete="username" value="${state._loginName || ''}"/>
         <div style="position:relative">
-          <input id="auth-pass" class="inp" type="${state._showPass?'text':'password'}" placeholder="Password" autocomplete="${isReg?'new-password':'current-password'}" value="${state._loginPass||''}"/>
+          <input id="auth-pass" class="inp" type="${state._showPass ? 'text' : 'password'}" placeholder="Password" autocomplete="${isReg ? 'new-password' : 'current-password'}" value="${state._loginPass || ''}"/>
           <button onclick="setState({_showPass:!state._showPass})" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text2);background:none;border:none;cursor:pointer;display:flex">
-            ${svgIcon(state._showPass?'eye_off':'eye',17)}
+            ${svgIcon(state._showPass ? 'eye_off' : 'eye', 17)}
           </button>
         </div>
         <button class="btn btn-primary w-full" style="margin-top:4px;padding:14px" onclick="submitAuth(${isReg})">
-          ${svgIcon('arrow_right',18)} ${isReg?'Create Account':'Sign In'}
+          ${svgIcon('arrow_right', 18)} ${isReg ? 'Create Account' : 'Sign In'}
         </button>
         <button onclick="setState({_loginReg:${!isReg}})" style="color:var(--text2);font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:center;padding:8px">
-          ${isReg?'Already have an account? Sign in →':'New here? Create an account →'}
+          ${isReg ? 'Already have an account? Sign in →' : 'New here? Create an account →'}
         </button>
       </div>
     </div>
@@ -599,103 +1590,103 @@ function renderLogin(){
           Create rounds, share codes with colleagues, track orders and split bills — all in one place.
         </p>
         <div style="display:flex;gap:24px;justify-content:center;margin-top:36px">
-          ${['☕ Track Orders','🏪 Manage Shops','💰 Split Bills'].map(f=>`<div class="text-xs text-muted font-bold">${f}</div>`).join('')}
+          ${['☕ Track Orders', '🏪 Manage Shops', '💰 Split Bills'].map(f => `<div class="text-xs text-muted font-bold">${f}</div>`).join('')}
         </div>
       </div>
     </div>
   </div>`;
-}
+    }
 
-function submitAuth(isReg){
-  const name=document.getElementById('auth-name')?.value||'';
-  const pass=document.getElementById('auth-pass')?.value||'';
-  state._loginName=name;state._loginPass=pass;
-  handleAuth(name,pass,isReg);
-}
+    function submitAuth(isReg) {
+      const name = document.getElementById('auth-name')?.value || '';
+      const pass = document.getElementById('auth-pass')?.value || '';
+      state._loginName = name; state._loginPass = pass;
+      handleAuth(name, pass, isReg);
+    }
 
-function renderNav(){
-  const v=state.view;
-  const items=[
-    {id:'home',icon:'home',label:'Dashboard'},
-    {id:'manage-shops',icon:'store',label:'Shops'},
-    {id:'profile',icon:'user',label:'Profile'},
-  ];
-  return `
+    function renderNav() {
+      const v = state.view;
+      const items = [
+        { id: 'home', icon: 'home', label: 'Dashboard' },
+        { id: 'manage-shops', icon: 'store', label: 'Shops' },
+        { id: 'profile', icon: 'user', label: 'Profile' },
+      ];
+      return `
   <div id="sidebar">
     <div class="logo">
       <div class="logo-icon">☕</div>
       <div><div class="logo-text">TeaRound</div><div class="logo-sub">Pro Edition</div></div>
     </div>
     <nav>
-      ${items.map(i=>`
-        <button class="nav-item ${v===i.id?'active':''}" onclick="setState({view:'${i.id}'})">
-          ${svgIcon(i.icon,18)} ${i.label}
+      ${items.map(i => `
+        <button class="nav-item ${v === i.id ? 'active' : ''}" onclick="setState({view:'${i.id}'})">
+          ${svgIcon(i.icon, 18)} ${i.label}
         </button>
       `).join('')}
     </nav>
     <div class="sidebar-footer">
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px">
-        ${avatarHtml(state.user,36,10)}
+        ${avatarHtml(state.user, 36, 10)}
         <div style="flex:1;min-width:0">
-          <div class="font-bold truncate" style="font-size:13px;color:var(--text)">${state.user?.username||''}</div>
-          <div class="text-xs text-muted upper">${state.user?.role||'user'}</div>
+          <div class="font-bold truncate" style="font-size:13px;color:var(--text)">${state.user?.username || ''}</div>
+          <div class="text-xs text-muted upper">${state.user?.role || 'user'}</div>
         </div>
-        <button class="btn-icon" onclick="handleLogout()" title="Sign out">${svgIcon('logout',16)}</button>
+        <button class="btn-icon" onclick="handleLogout()" title="Sign out">${svgIcon('logout', 16)}</button>
       </div>
     </div>
   </div>
   <nav id="bottom-nav">
-    ${items.map(i=>`
-      <button class="bnav-item ${v===i.id?'active':''}" onclick="setState({view:'${i.id}'})">
-        ${svgIcon(i.icon,22)} <span>${i.label}</span>
+    ${items.map(i => `
+      <button class="bnav-item ${v === i.id ? 'active' : ''}" onclick="setState({view:'${i.id}'})">
+        ${svgIcon(i.icon, 22)} <span>${i.label}</span>
       </button>
     `).join('')}
   </nav>`;
-}
+    }
 
-function handleLogout(){
-  state.user=null;setState({view:'login'});
-  toast('Signed out');
-}
+    function handleLogout() {
+      state.user = null; setState({ view: 'login' });
+      toast('Signed out');
+    }
 
-function renderTopbar(title,back=null){
-  return `<div id="topbar">
+    function renderTopbar(title, back = null) {
+      return `<div id="topbar">
     <div class="flex gap-12">
-      ${back?`<button class="btn-icon" onclick="setState({view:'${back}'})">${svgIcon('chevron_left',20)}</button>`:''}
+      ${back ? `<button class="btn-icon" onclick="setState({view:'${back}'})">${svgIcon('chevron_left', 20)}</button>` : ''}
       <h1>${title}</h1>
     </div>
     <div class="flex gap-8">
-      <button class="btn-icon" onclick="setState({modal:{type:'theme'}})" title="Theme">${svgIcon('palette',16)}</button>
-      ${avatarHtml(state.user,36,10)}
+      <button class="btn-icon" onclick="setState({modal:{type:'theme'}})" title="Theme">${svgIcon('palette', 16)}</button>
+      ${avatarHtml(state.user, 36, 10)}
     </div>
   </div>`;
-}
+    }
 
-// ── HOME ─────────────────────────────────────────────────────────────────────
-function renderHome(){
-  const activeSessions=state.sessions.filter(s=>!s.closed);
-  const closedSessions=state.sessions.filter(s=>s.closed);
-  const totalOrders=state.orders.filter(o=>o.userId===state.user?.id).length;
-  const hosted=state.sessions.filter(s=>s.creatorId===state.user?.id).length;
-  const spent=state.orders.filter(o=>o.userId===state.user?.id).reduce((a,o)=>a+o.price*o.quantity,0);
+    // ── HOME ─────────────────────────────────────────────────────────────────────
+    function renderHome() {
+      const activeSessions = state.sessions.filter(s => !s.closed);
+      const closedSessions = state.sessions.filter(s => s.closed);
+      const totalOrders = state.orders.filter(o => o.userId === state.user?.id).length;
+      const hosted = state.sessions.filter(s => s.creatorId === state.user?.id).length;
+      const spent = state.orders.filter(o => o.userId === state.user?.id).reduce((a, o) => a + o.price * o.quantity, 0);
 
-  return `
+      return `
   ${renderTopbar('Dashboard')}
   <div id="content">
     <!-- Stats -->
     <div class="grid-3" style="margin-bottom:28px">
       <div class="stat-card">
-        <div class="stat-icon">${svgIcon('coffee',20)}</div>
+        <div class="stat-icon">${svgIcon('coffee', 20)}</div>
         <div class="stat-num">${totalOrders}</div>
         <div class="stat-label">Orders placed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">${svgIcon('zap',20)}</div>
+        <div class="stat-icon">${svgIcon('zap', 20)}</div>
         <div class="stat-num">${hosted}</div>
         <div class="stat-label">Rounds hosted</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">${svgIcon('trending_up',20)}</div>
+        <div class="stat-icon">${svgIcon('trending_up', 20)}</div>
         <div class="stat-num">₹${spent}</div>
         <div class="stat-label">Total spent</div>
       </div>
@@ -704,13 +1695,13 @@ function renderHome(){
     <!-- Join code -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:28px">
       <div class="flex gap-8" style="margin-bottom:14px">
-        ${svgIcon('zap',16,'style="color:var(--accent)"')}
+        ${svgIcon('zap', 16, 'style="color:var(--accent)"')}
         <span class="text-xs upper font-bold text-accent">Quick Join</span>
       </div>
       <div class="flex gap-8">
         <input id="join-code" class="code-input" placeholder="ROUND-XXXXXX" style="flex:1;text-align:left;font-size:16px;letter-spacing:.1em"/>
         <button class="btn btn-primary" style="white-space:nowrap" onclick="quickJoin()">
-          ${svgIcon('arrow_right',18)} Join
+          ${svgIcon('arrow_right', 18)} Join
         </button>
       </div>
     </div>
@@ -718,12 +1709,12 @@ function renderHome(){
     <!-- Quick actions -->
     <div class="grid-2" style="margin-bottom:28px">
       <button class="card" style="padding:22px;text-align:left;cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-xl);transition:all .2s" onclick="setState({view:'create-session'})" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--accent)">${svgIcon('plus',22)}</div>
+        <div style="width:44px;height:44px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--accent)">${svgIcon('plus', 22)}</div>
         <div class="font-syne font-black" style="font-size:15px;color:var(--text);margin-bottom:4px">New Round</div>
         <div class="text-xs text-muted">Start a group order</div>
       </button>
       <button class="card" style="padding:22px;text-align:left;cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-xl);transition:all .2s" onclick="setState({view:'manage-shops'})" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--text2)">${svgIcon('store',22)}</div>
+        <div style="width:44px;height:44px;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--text2)">${svgIcon('store', 22)}</div>
         <div class="font-syne font-black" style="font-size:15px;color:var(--text);margin-bottom:4px">Manage Shops</div>
         <div class="text-xs text-muted">Add outlets & menus</div>
       </button>
@@ -731,69 +1722,69 @@ function renderHome(){
 
     <!-- Active sessions -->
     <div class="section-title">Active Rounds</div>
-    <div class="section-sub">${activeSessions.length} ongoing round${activeSessions.length!==1?'s':''}</div>
+    <div class="section-sub">${activeSessions.length} ongoing round${activeSessions.length !== 1 ? 's' : ''}</div>
     <div class="stack-8" style="margin-bottom:28px">
-      ${activeSessions.length===0?`<div class="empty-state"><div class="empty-icon">☕</div><div class="empty-text">No active rounds. Start one!</div></div>`
-      :activeSessions.slice().reverse().map(s=>{
-        const shop=state.shops.find(sh=>sh.id===s.shopId);
-        const cnt=state.orders.filter(o=>o.sessionId===s.id).length;
-        const total=state.orders.filter(o=>o.sessionId===s.id).reduce((a,o)=>a+o.price*o.quantity,0);
-        return `<div class="session-row" onclick="goToSession('${s.id}')">
+      ${activeSessions.length === 0 ? `<div class="empty-state"><div class="empty-icon">☕</div><div class="empty-text">No active rounds. Start one!</div></div>`
+          : activeSessions.slice().reverse().map(s => {
+            const shop = state.shops.find(sh => sh.id === s.shopId);
+            const cnt = state.orders.filter(o => o.sessionId === s.id).length;
+            const total = state.orders.filter(o => o.sessionId === s.id).reduce((a, o) => a + o.price * o.quantity, 0);
+            return `<div class="session-row" onclick="goToSession('${s.id}')">
           <div class="session-icon">☕</div>
           <div style="flex:1;min-width:0">
             <div class="flex gap-8" style="margin-bottom:3px">
               <span class="tag tag-green">${s.id}</span>
-              ${s.locked?`<span class="tag tag-red">${svgIcon('lock',11)} Locked</span>`:''}
+              ${s.locked ? `<span class="tag tag-red">${svgIcon('lock', 11)} Locked</span>` : ''}
             </div>
-            <div class="font-bold truncate" style="font-size:15px;color:var(--text)">${shop?.name||'Deleted Shop'}</div>
-            <div class="text-xs text-muted">${cnt} order${cnt!==1?'s':''} · ${s.location||'—'}</div>
+            <div class="font-bold truncate" style="font-size:15px;color:var(--text)">${shop?.name || 'Deleted Shop'}</div>
+            <div class="text-xs text-muted">${cnt} order${cnt !== 1 ? 's' : ''} · ${s.location || '—'}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div class="font-black text-accent" style="font-size:16px">₹${total}</div>
-            ${svgIcon('chevron_right',16,'style="color:var(--text3)"')}
+            ${svgIcon('chevron_right', 16, 'style="color:var(--text3)"')}
           </div>
         </div>`;
-      }).join('')}
+          }).join('')}
     </div>
 
     <!-- History -->
-    ${closedSessions.length>0?`
+    ${closedSessions.length > 0 ? `
     <div class="section-title">History</div>
     <div class="section-sub">Completed rounds</div>
     <div class="stack-8">
-      ${closedSessions.slice().reverse().slice(0,5).map(s=>{
-        const shop=state.shops.find(sh=>sh.id===s.shopId);
-        const total=state.orders.filter(o=>o.sessionId===s.id).reduce((a,o)=>a+o.price*o.quantity,0);
-        return `<div class="session-row" style="opacity:.65" onclick="goToSession('${s.id}')">
-          <div class="session-icon" style="background:var(--surface2)">${svgIcon('clock',20,'style="color:var(--text3)"')}</div>
+      ${closedSessions.slice().reverse().slice(0, 5).map(s => {
+            const shop = state.shops.find(sh => sh.id === s.shopId);
+            const total = state.orders.filter(o => o.sessionId === s.id).reduce((a, o) => a + o.price * o.quantity, 0);
+            return `<div class="session-row" style="opacity:.65" onclick="goToSession('${s.id}')">
+          <div class="session-icon" style="background:var(--surface2)">${svgIcon('clock', 20, 'style="color:var(--text3)"')}</div>
           <div style="flex:1;min-width:0">
             <div class="tag tag-muted" style="margin-bottom:3px">${s.id} · Closed</div>
-            <div class="font-bold truncate" style="color:var(--text)">${shop?.name||'—'}</div>
+            <div class="font-bold truncate" style="color:var(--text)">${shop?.name || '—'}</div>
           </div>
           <div class="font-black" style="color:var(--text2)">₹${total}</div>
         </div>`;
-      }).join('')}
-    </div>`:''}
+          }).join('')}
+    </div>`: ''}
   </div>`;
-}
+    }
 
-function quickJoin(){
-  const code=(document.getElementById('join-code')?.value||'').trim().toUpperCase();
-  if(!code){toast('Enter a round code','error');return;}
-  const s=state.sessions.find(s=>s.id===code);
-  if(s){goToSession(code);}else{toast('Round not found','error');}
-}
-function goToSession(id){setState({activeSessionId:id,view:'session'});}
+    function quickJoin() {
+      const code = (document.getElementById('join-code')?.value || '').trim().toUpperCase();
+      if (!code) { toast('Enter a round code', 'error'); return; }
+      const s = state.sessions.find(s => s.id === code);
+      if (s) { goToSession(code); } else { toast('Round not found', 'error'); }
+    }
+    function goToSession(id) { setState({ activeSessionId: id, view: 'session' }); }
 
-// ── SHOPS ─────────────────────────────────────────────────────────────────────
-function renderShops(){
-  return `
+    // ── SHOPS ─────────────────────────────────────────────────────────────────────
+    function renderShops() {
+      return `
   ${renderTopbar('Shops')}
   <div id="content">
     <div class="flex-between" style="margin-bottom:20px">
-      <div><div class="section-title">Outlets</div><div class="section-sub">${state.shops.length} shop${state.shops.length!==1?'s':''} configured</div></div>
+      <div><div class="section-title">Outlets</div><div class="section-sub">${state.shops.length} shop${state.shops.length !== 1 ? 's' : ''} configured</div></div>
       <button class="btn btn-dark" onclick="setState({modal:{type:'import'}})">
-        ${svgIcon('upload',16)} Import
+        ${svgIcon('upload', 16)} Import
       </button>
     </div>
 
@@ -803,47 +1794,47 @@ function renderShops(){
         <input id="shop-name" class="inp" placeholder="Shop name"/>
         <input id="shop-addr" class="inp" placeholder="Address / Location"/>
         <button class="btn btn-primary w-full" onclick="createShop()">
-          ${svgIcon('plus',18)} Create Outlet
+          ${svgIcon('plus', 18)} Create Outlet
         </button>
       </div>
     </div>
 
     <div class="stack-8">
-      ${state.shops.length===0?`<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-text">No outlets yet. Add one above or import a config.</div></div>`
-      :state.shops.map(s=>`
+      ${state.shops.length === 0 ? `<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-text">No outlets yet. Add one above or import a config.</div></div>`
+          : state.shops.map(s => `
         <div class="card" style="padding:18px 20px;display:flex;align-items:center;gap:14px">
           <div style="width:48px;height:48px;background:var(--accent-dim);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏪</div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="setState({activeShopId:'${s.id}',view:'edit-menu'})">
             <div class="font-bold" style="font-size:15px;color:var(--text)">${s.name}</div>
-            <div class="text-xs text-muted">${s.address} · ${s.menu?.length||0} items</div>
+            <div class="text-xs text-muted">${s.address} · ${s.menu?.length || 0} items</div>
           </div>
           <div class="flex gap-8">
-            <button class="btn-icon" onclick="exportShop(state.shops.find(sh=>sh.id==='${s.id}'))" title="Export">${svgIcon('download',16)}</button>
-            <button class="btn-icon" style="color:var(--danger)" onclick="confirmDelete('Remove \\"${s.name}\\"?',()=>{DB.deleteShop('${s.id}');state.shops=state.shops.filter(sh=>sh.id!=='${s.id}');setState({});})" title="Delete">${svgIcon('trash',16)}</button>
+            <button class="btn-icon" onclick="exportShop(state.shops.find(sh=>sh.id==='${s.id}'))" title="Export">${svgIcon('download', 16)}</button>
+            <button class="btn-icon" style="color:var(--danger)" onclick="confirmDelete('Remove \\"${s.name}\\"?',()=>{DB.deleteShop('${s.id}');state.shops=state.shops.filter(sh=>sh.id!=='${s.id}');setState({});})" title="Delete">${svgIcon('trash', 16)}</button>
           </div>
         </div>
       `).join('')}
     </div>
   </div>`;
-}
+    }
 
-function createShop(){
-  const name=document.getElementById('shop-name')?.value?.trim();
-  const addr=document.getElementById('shop-addr')?.value?.trim();
-  if(!name||!addr){toast('Fill both fields','error');return;}
-  const shop={id:gid(),name,address:addr,menu:[],creatorId:state.user.id};
-  state.shops.push(shop);
-  DB.upsertShop(shop);
-  setState({});toast('Outlet created!');
-}
+    function createShop() {
+      const name = document.getElementById('shop-name')?.value?.trim();
+      const addr = document.getElementById('shop-addr')?.value?.trim();
+      if (!name || !addr) { toast('Fill both fields', 'error'); return; }
+      const shop = { id: gid(), name, address: addr, menu: [], creatorId: state.user.id };
+      state.shops.push(shop);
+      DB.upsertShop(shop);
+      setState({}); toast('Outlet created!');
+    }
 
-// ── EDIT MENU ─────────────────────────────────────────────────────────────────
-function renderEditMenu(){
-  const shop=state.shops.find(s=>s.id===state.activeShopId);
-  if(!shop)return renderShops();
-  const selEmoji=state._menuEmoji||'🍵';
-  return `
-  ${renderTopbar(`Edit: ${shop.name}`,'manage-shops')}
+    // ── EDIT MENU ─────────────────────────────────────────────────────────────────
+    function renderEditMenu() {
+      const shop = state.shops.find(s => s.id === state.activeShopId);
+      if (!shop) return renderShops();
+      const selEmoji = state._menuEmoji || '🍵';
+      return `
+  ${renderTopbar(`Edit: ${shop.name}`, 'manage-shops')}
   <div id="content">
     <div class="card" style="padding:22px;margin-bottom:22px">
       <div class="font-bold" style="margin-bottom:14px;color:var(--text2);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Add Menu Item</div>
@@ -855,53 +1846,53 @@ function renderEditMenu(){
         </div>
       </div>
       <div class="emoji-grid" style="margin-bottom:14px">
-        ${FOOD_EMOJIS.map(em=>`<button class="emoji-btn ${em===selEmoji?'active':''}" onclick="setState({_menuEmoji:'${em}'})">${em}</button>`).join('')}
+        ${FOOD_EMOJIS.map(em => `<button class="emoji-btn ${em === selEmoji ? 'active' : ''}" onclick="setState({_menuEmoji:'${em}'})">${em}</button>`).join('')}
       </div>
       <button class="btn btn-primary w-full" onclick="addMenuItem('${shop.id}')">
-        ${svgIcon('plus',18)} Add Item
+        ${svgIcon('plus', 18)} Add Item
       </button>
     </div>
 
     <div class="section-title" style="margin-bottom:12px">Menu (${shop.menu.length} items)</div>
     <div class="stack-8">
-      ${shop.menu.length===0?`<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-text">No items yet. Add some above.</div></div>`
-      :shop.menu.map(item=>`
+      ${shop.menu.length === 0 ? `<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-text">No items yet. Add some above.</div></div>`
+          : shop.menu.map(item => `
         <div class="menu-item">
           <div class="menu-emoji">${item.emoji}</div>
           <div style="flex:1">
             <div class="font-bold" style="color:var(--text)">${item.name}</div>
             <div class="text-accent font-bold text-sm">₹${item.price}</div>
           </div>
-          <button class="btn-icon" style="color:var(--danger)" onclick="removeMenuItem('${shop.id}','${item.id}')">${svgIcon('trash',16)}</button>
+          <button class="btn-icon" style="color:var(--danger)" onclick="removeMenuItem('${shop.id}','${item.id}')">${svgIcon('trash', 16)}</button>
         </div>
       `).join('')}
     </div>
   </div>`;
-}
+    }
 
-function addMenuItem(shopId){
-  const name=document.getElementById('item-name')?.value?.trim();
-  const price=document.getElementById('item-price')?.value;
-  if(!name){toast('Enter item name','error');return;}
-  const emoji=state._menuEmoji||'🍵';
-  state.shops=state.shops.map(s=>s.id===shopId?{...s,menu:[...s.menu,{id:gid(),name,price:parseFloat(price)||0,emoji}]}:s);
-  const updatedShop=state.shops.find(s=>s.id===shopId);
-  DB.upsertShop(updatedShop);
-  setState({_menuEmoji:emoji});toast('Item added!');
-}
-function removeMenuItem(shopId,itemId){
-  state.shops=state.shops.map(s=>s.id===shopId?{...s,menu:s.menu.filter(m=>m.id!==itemId)}:s);
-  const updatedShop=state.shops.find(s=>s.id===shopId);
-  DB.upsertShop(updatedShop);
-  setState({});toast('Item removed');
-}
+    function addMenuItem(shopId) {
+      const name = document.getElementById('item-name')?.value?.trim();
+      const price = document.getElementById('item-price')?.value;
+      if (!name) { toast('Enter item name', 'error'); return; }
+      const emoji = state._menuEmoji || '🍵';
+      state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: [...s.menu, { id: gid(), name, price: parseFloat(price) || 0, emoji }] } : s);
+      const updatedShop = state.shops.find(s => s.id === shopId);
+      DB.upsertShop(updatedShop);
+      setState({ _menuEmoji: emoji }); toast('Item added!');
+    }
+    function removeMenuItem(shopId, itemId) {
+      state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: s.menu.filter(m => m.id !== itemId) } : s);
+      const updatedShop = state.shops.find(s => s.id === shopId);
+      DB.upsertShop(updatedShop);
+      setState({}); toast('Item removed');
+    }
 
-// ── CREATE SESSION ────────────────────────────────────────────────────────────
-function renderCreateSession(){
-  const selShop=state._newSessionShop||'';
-  const shop=state.shops.find(s=>s.id===selShop);
-  return `
-  ${renderTopbar('New Round','home')}
+    // ── CREATE SESSION ────────────────────────────────────────────────────────────
+    function renderCreateSession() {
+      const selShop = state._newSessionShop || '';
+      const shop = state.shops.find(s => s.id === selShop);
+      return `
+  ${renderTopbar('New Round', 'home')}
   <div id="content">
     <div class="card" style="padding:28px;max-width:560px">
       <div class="font-syne font-black" style="font-size:22px;color:var(--text);margin-bottom:6px">Configure Round</div>
@@ -911,59 +1902,59 @@ function renderCreateSession(){
         <label class="text-xs upper font-bold text-muted" style="display:block;margin-bottom:8px">Select Outlet</label>
         <select class="inp" id="session-shop" onchange="setState({_newSessionShop:this.value,_newSessionLoc:state.shops.find(s=>s.id===this.value)?.address||''})" style="appearance:none">
           <option value="">Choose a shop…</option>
-          ${state.shops.map(s=>`<option value="${s.id}" ${selShop===s.id?'selected':''}>${s.name} — ${s.address}</option>`).join('')}
+          ${state.shops.map(s => `<option value="${s.id}" ${selShop === s.id ? 'selected' : ''}>${s.name} — ${s.address}</option>`).join('')}
         </select>
-        ${state.shops.length===0?`<div class="text-xs" style="color:var(--danger);margin-top:6px">No shops yet. <button onclick="setState({view:'manage-shops'})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700">Create one first →</button></div>`:''}
+        ${state.shops.length === 0 ? `<div class="text-xs" style="color:var(--danger);margin-top:6px">No shops yet. <button onclick="setState({view:'manage-shops'})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700">Create one first →</button></div>` : ''}
       </div>
 
       <div style="margin-bottom:28px">
         <label class="text-xs upper font-bold text-muted" style="display:block;margin-bottom:8px">Delivery Location</label>
-        <input id="session-loc" class="inp" placeholder="Where to deliver?" value="${state._newSessionLoc||''}"/>
+        <input id="session-loc" class="inp" placeholder="Where to deliver?" value="${state._newSessionLoc || ''}"/>
       </div>
 
-      <button class="btn btn-primary w-full" style="padding:14px;font-size:15px" onclick="createSession()" ${!selShop?'disabled':''}>
-        ${svgIcon('zap',18)} Start Round
+      <button class="btn btn-primary w-full" style="padding:14px;font-size:15px" onclick="createSession()" ${!selShop ? 'disabled' : ''}>
+        ${svgIcon('zap', 18)} Start Round
       </button>
     </div>
   </div>`;
-}
+    }
 
-function createSession(){
-  const shopId=document.getElementById('session-shop')?.value;
-  const loc=document.getElementById('session-loc')?.value?.trim()||'Office';
-  if(!shopId){toast('Select a shop','error');return;}
-  const id=`ROUND-${gid()}`;
-  const session={id,shopId,location:loc,creatorId:state.user.id,createdAt:new Date().toISOString(),locked:false,closed:false};
-  state.sessions.push(session);
-  DB.upsertSession(session);
-  setState({activeSessionId:id,view:'session',_newSessionShop:'',_newSessionLoc:''});
-  toast('Round started!');
-}
+    function createSession() {
+      const shopId = document.getElementById('session-shop')?.value;
+      const loc = document.getElementById('session-loc')?.value?.trim() || 'Office';
+      if (!shopId) { toast('Select a shop', 'error'); return; }
+      const id = `ROUND-${gid()}`;
+      const session = { id, shopId, location: loc, creatorId: state.user.id, createdAt: new Date().toISOString(), locked: false, closed: false };
+      state.sessions.push(session);
+      DB.upsertSession(session);
+      setState({ activeSessionId: id, view: 'session', _newSessionShop: '', _newSessionLoc: '' });
+      toast('Round started!');
+    }
 
-// ── SESSION ───────────────────────────────────────────────────────────────────
-function renderSession(){
-  const session=getSession();
-  const shop=getSessionShop();
-  const so=getSessionOrders();
-  if(!session)return renderHome();
+    // ── SESSION ───────────────────────────────────────────────────────────────────
+    function renderSession() {
+      const session = getSession();
+      const shop = getSessionShop();
+      const so = getSessionOrders();
+      if (!session) return renderHome();
 
-  const isCreator=session.creatorId===state.user?.id||state.user?.role==='admin';
-  const total=so.reduce((a,o)=>a+o.price*o.quantity,0);
-  const agg=Object.entries(so.reduce((a,o)=>{a[o.itemName]=(a[o.itemName]||0)+o.quantity;return a},{}));
-  const uniqueUsers=[...new Set(so.map(o=>o.userId))];
-  const perPerson=uniqueUsers.length?Math.ceil(total/uniqueUsers.length):0;
-  const qty=state._orderQty||{};
+      const isCreator = session.creatorId === state.user?.id || state.user?.role === 'admin';
+      const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
+      const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
+      const uniqueUsers = [...new Set(so.map(o => o.userId))];
+      const perPerson = uniqueUsers.length ? Math.ceil(total / uniqueUsers.length) : 0;
+      const qty = state._orderQty || {};
 
-  const billPanel=`
+      const billPanel = `
     <div class="bill-panel">
       <div class="bill-header">
         <div class="flex-between">
           <div class="font-syne font-black" style="font-size:16px;color:var(--text)">Group Totals</div>
-          <span class="tag tag-green">${so.length} item${so.length!==1?'s':''}</span>
+          <span class="tag tag-green">${so.length} item${so.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
-      ${agg.length===0?`<div class="bill-row"><span class="text-muted" style="font-style:italic;font-size:13px">Waiting for orders…</span></div>`
-      :agg.map(([name,count])=>`
+      ${agg.length === 0 ? `<div class="bill-row"><span class="text-muted" style="font-style:italic;font-size:13px">Waiting for orders…</span></div>`
+          : agg.map(([name, count]) => `
         <div class="bill-row">
           <span class="font-bold" style="font-size:14px;color:var(--text)">${name}</span>
           <span class="font-black text-accent">×${count}</span>
@@ -975,45 +1966,45 @@ function renderSession(){
           <div class="font-syne font-black" style="font-size:28px;color:#0a0a14">₹${total}</div>
         </div>
         <button onclick="setState({modal:{type:'split'}})" style="background:rgba(0,0,0,.15);border:none;border-radius:10px;padding:10px 14px;cursor:pointer;color:#0a0a14;font-weight:800;font-size:12px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px">
-          ${svgIcon('calculator',14,'style="color:#0a0a14"')} Split ₹${perPerson}/ea
+          ${svgIcon('calculator', 14, 'style="color:#0a0a14"')} Split ₹${perPerson}/ea
         </button>
       </div>
     </div>`;
 
-  return `
-  ${renderTopbar(shop?.name||'Round','home')}
+      return `
+  ${renderTopbar(shop?.name || 'Round', 'home')}
   <div id="content">
     <!-- Session header strip -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
         <div class="flex gap-8" style="margin-bottom:5px">
           <span class="tag tag-green">${session.id}</span>
-          ${session.closed?`<span class="tag tag-muted">Closed</span>`:session.locked?`<span class="tag tag-red">Locked</span>`:''}
+          ${session.closed ? `<span class="tag tag-muted">Closed</span>` : session.locked ? `<span class="tag tag-red">Locked</span>` : ''}
         </div>
         <div class="flex gap-6" style="color:var(--text2);font-size:13px;font-weight:600">
-          ${svgIcon('map_pin',13,'style="flex-shrink:0"')} ${session.location}
+          ${svgIcon('map_pin', 13, 'style="flex-shrink:0"')} ${session.location}
         </div>
       </div>
       <div class="flex gap-8">
-        ${isCreator&&!session.closed?`
+        ${isCreator && !session.closed ? `
           <button class="btn btn-dark" onclick="toggleLock('${session.id}')">
-            ${svgIcon(session.locked?'unlock':'lock',16)} ${session.locked?'Unlock':'Lock'}
+            ${svgIcon(session.locked ? 'unlock' : 'lock', 16)} ${session.locked ? 'Unlock' : 'Lock'}
           </button>
           <button class="btn btn-danger" onclick="closeRound('${session.id}')">
-            ${svgIcon('x',16)} Close
+            ${svgIcon('x', 16)} Close
           </button>
-        `:''}
+        `: ''}
         <button class="btn btn-dark" onclick="downloadSummary()">
-          ${svgIcon('download',16)}
+          ${svgIcon('download', 16)}
         </button>
         <button class="btn btn-primary" onclick="setState({modal:{type:'share'}})">
-          ${svgIcon('share',16)} Share
+          ${svgIcon('share', 16)} Share
         </button>
       </div>
     </div>
 
-    ${session.locked&&!session.closed?`<div class="status-banner status-banner-locked" style="margin-bottom:20px">${svgIcon('lock',16)} This round is locked by the host. No new orders.</div>`:''}
-    ${session.closed?`<div class="status-banner status-banner-closed" style="margin-bottom:20px">${svgIcon('clock',16)} This round is closed.</div>`:''}
+    ${session.locked && !session.closed ? `<div class="status-banner status-banner-locked" style="margin-bottom:20px">${svgIcon('lock', 16)} This round is locked by the host. No new orders.</div>` : ''}
+    ${session.closed ? `<div class="status-banner status-banner-closed" style="margin-bottom:20px">${svgIcon('clock', 16)} This round is closed.</div>` : ''}
 
     <div class="session-layout">
       <!-- Left: orders + menu -->
@@ -1023,20 +2014,20 @@ function renderSession(){
           <div class="section-title">Member Orders</div>
           <div class="section-sub">Who ordered what</div>
           <div class="stack-8">
-            ${so.length===0?`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders yet. Be first!</div></div>`
-            :so.map(o=>`
+            ${so.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders yet. Be first!</div></div>`
+          : so.map(o => `
               <div class="card-sm" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
                 <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
-                  ${avatarHtml(state.users.find(u=>u.id===o.userId)||{username:o.userName,avatarColor:'#888'},34,8)}
+                  ${avatarHtml(state.users.find(u => u.id === o.userId) || { username: o.userName, avatarColor: '#888' }, 34, 8)}
                   <div style="min-width:0">
                     <div class="tag tag-green" style="margin-bottom:2px">${o.userName}</div>
                     <div class="font-bold truncate" style="font-size:14px;color:var(--text)">${o.itemName} <span class="text-muted">×${o.quantity}</span></div>
                   </div>
                 </div>
                 <div class="flex gap-10" style="flex-shrink:0">
-                  <span class="font-bold text-muted" style="font-size:13px">₹${o.price*o.quantity}</span>
-                  ${(o.userId===state.user?.id||state.user?.role==='admin')&&!session.closed?
-                    `<button class="btn-icon" style="color:var(--danger);width:32px;height:32px" onclick="removeOrder('${o.id}')">${svgIcon('trash',14)}</button>`:''}
+                  <span class="font-bold text-muted" style="font-size:13px">₹${o.price * o.quantity}</span>
+                  ${(o.userId === state.user?.id || state.user?.role === 'admin') && !session.closed ?
+              `<button class="btn-icon" style="color:var(--danger);width:32px;height:32px" onclick="removeOrder('${o.id}')">${svgIcon('trash', 14)}</button>` : ''}
                 </div>
               </div>
             `).join('')}
@@ -1044,13 +2035,13 @@ function renderSession(){
         </div>
 
         <!-- Menu to order from -->
-        ${!session.closed&&!session.locked?`
+        ${!session.closed && !session.locked ? `
         <div>
           <div class="section-title">Place Order</div>
-          <div class="section-sub">Select from ${shop?.name||'menu'}</div>
+          <div class="section-sub">Select from ${shop?.name || 'menu'}</div>
           <div class="stack-8">
-            ${shop?.menu?.length===0||!shop?`<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-text">This shop has no menu items.</div></div>`
-            :shop.menu.map(item=>`
+            ${shop?.menu?.length === 0 || !shop ? `<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-text">This shop has no menu items.</div></div>`
+            : shop.menu.map(item => `
               <div class="menu-item">
                 <div class="menu-emoji">${item.emoji}</div>
                 <div style="flex:1">
@@ -1060,17 +2051,17 @@ function renderSession(){
                 <div class="flex gap-10">
                   <div class="qty-stepper">
                     <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
-                    <span class="qty-num" id="qty-${item.id}">${qty[item.id]||1}</span>
+                    <span class="qty-num" id="qty-${item.id}">${qty[item.id] || 1}</span>
                     <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
                   </div>
                   <button class="btn btn-primary" style="padding:8px 14px" onclick="addOrder('${session.id}','${item.id}','${item.name}',${item.price})">
-                    ${svgIcon('plus',16)} Add
+                    ${svgIcon('plus', 16)} Add
                   </button>
                 </div>
               </div>
             `).join('')}
           </div>
-        </div>`:''}
+        </div>`: ''}
       </div>
 
       <!-- Right: bill panel -->
@@ -1079,103 +2070,103 @@ function renderSession(){
       </div>
     </div>
   </div>`;
-}
+    }
 
-function toggleLock(id){
-  state.sessions=state.sessions.map(s=>s.id===id?{...s,locked:!s.locked}:s);
-  const updated=state.sessions.find(s=>s.id===id);
-  DB.upsertSession(updated);
-  setState({});toast(updated?.locked?'Round locked':'Round unlocked');
-}
-function closeRound(id){
-  confirmDelete('Close this round? Orders will be frozen.',()=>{
-    state.sessions=state.sessions.map(s=>s.id===id?{...s,closed:true,locked:true}:s);
-    const updated=state.sessions.find(s=>s.id===id);
-    DB.upsertSession(updated);
-    setState({});toast('Round closed');
-  });
-}
-function removeOrder(id){
-  DB.deleteOrder(id);
-  state.orders=state.orders.filter(o=>o.id!==id);setState({});toast('Order removed');
-}
-function changeQty(itemId,delta){
-  const q=state._orderQty||{};
-  q[itemId]=Math.max(1,(q[itemId]||1)+delta);
-  state._orderQty=q;
-  const el=document.getElementById(`qty-${itemId}`);
-  if(el)el.textContent=q[itemId];
-}
-function addOrder(sessionId,itemId,itemName,price){
-  const qty=(state._orderQty||{})[itemId]||1;
-  const order={id:gid(),sessionId,userId:state.user.id,userName:state.user.username,itemId,itemName,price:parseFloat(price)||0,quantity:qty,note:''};
-  state.orders.push(order);
-  DB.upsertOrder(order);
-  const q=state._orderQty||{};q[itemId]=1;state._orderQty=q;
-  setState({});toast(`${itemName} added!`);
-}
+    function toggleLock(id) {
+      state.sessions = state.sessions.map(s => s.id === id ? { ...s, locked: !s.locked } : s);
+      const updated = state.sessions.find(s => s.id === id);
+      DB.upsertSession(updated);
+      setState({}); toast(updated?.locked ? 'Round locked' : 'Round unlocked');
+    }
+    function closeRound(id) {
+      confirmDelete('Close this round? Orders will be frozen.', () => {
+        state.sessions = state.sessions.map(s => s.id === id ? { ...s, closed: true, locked: true } : s);
+        const updated = state.sessions.find(s => s.id === id);
+        DB.upsertSession(updated);
+        setState({}); toast('Round closed');
+      });
+    }
+    function removeOrder(id) {
+      DB.deleteOrder(id);
+      state.orders = state.orders.filter(o => o.id !== id); setState({}); toast('Order removed');
+    }
+    function changeQty(itemId, delta) {
+      const q = state._orderQty || {};
+      q[itemId] = Math.max(1, (q[itemId] || 1) + delta);
+      state._orderQty = q;
+      const el = document.getElementById(`qty-${itemId}`);
+      if (el) el.textContent = q[itemId];
+    }
+    function addOrder(sessionId, itemId, itemName, price) {
+      const qty = (state._orderQty || {})[itemId] || 1;
+      const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
+      state.orders.push(order);
+      DB.upsertOrder(order);
+      const q = state._orderQty || {}; q[itemId] = 1; state._orderQty = q;
+      setState({}); toast(`${itemName} added!`);
+    }
 
-// ── PROFILE ───────────────────────────────────────────────────────────────────
-function renderProfile(){
-  const tab=state._profileTab||'overview';
-  const u=state.user;
-  const userOrders=state.orders.filter(o=>o.userId===u?.id);
-  const totalSpent=userOrders.reduce((a,o)=>a+o.price*o.quantity,0);
-  const stats={totalOrders:userOrders.length,roundsHosted:state.sessions.filter(s=>s.creatorId===u?.id).length,shopsCreated:state.shops.filter(s=>s.creatorId===u?.id).length,totalSpent};
-  const earnedBadges=BADGES.filter(b=>b.cond(stats));
+    // ── PROFILE ───────────────────────────────────────────────────────────────────
+    function renderProfile() {
+      const tab = state._profileTab || 'overview';
+      const u = state.user;
+      const userOrders = state.orders.filter(o => o.userId === u?.id);
+      const totalSpent = userOrders.reduce((a, o) => a + o.price * o.quantity, 0);
+      const stats = { totalOrders: userOrders.length, roundsHosted: state.sessions.filter(s => s.creatorId === u?.id).length, shopsCreated: state.shops.filter(s => s.creatorId === u?.id).length, totalSpent };
+      const earnedBadges = BADGES.filter(b => b.cond(stats));
 
-  const favItems=Object.entries(userOrders.reduce((a,o)=>{a[o.itemName]=(a[o.itemName]||0)+o.quantity;return a},{})).sort((a,b)=>b[1]-a[1]).slice(0,4);
+      const favItems = Object.entries(userOrders.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4);
 
-  return `
+      return `
   ${renderTopbar('Profile')}
   <div id="content">
     <!-- Hero -->
     <div class="profile-hero">
       <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
-        ${avatarHtml(u,72,18)}
+        ${avatarHtml(u, 72, 18)}
         <div style="flex:1">
-          ${state._editProfile?`
+          ${state._editProfile ? `
             <div class="stack-8">
               <input id="edit-username" class="inp" value="${u.username}" placeholder="Username" style="padding:9px 14px"/>
               <div style="position:relative">
-                <input id="edit-pass" class="inp" type="${state._showEditPass?'text':'password'}" placeholder="New password (blank = keep)" style="padding:9px 14px;padding-right:42px"/>
-                <button onclick="setState({_showEditPass:!state._showEditPass})" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass?'eye_off':'eye',15)}</button>
+                <input id="edit-pass" class="inp" type="${state._showEditPass ? 'text' : 'password'}" placeholder="New password (blank = keep)" style="padding:9px 14px;padding-right:42px"/>
+                <button onclick="setState({_showEditPass:!state._showEditPass})" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass ? 'eye_off' : 'eye', 15)}</button>
               </div>
-              <input id="edit-bio" class="inp" value="${u.bio||''}" placeholder="Bio (optional)" style="padding:9px 14px"/>
+              <input id="edit-bio" class="inp" value="${u.bio || ''}" placeholder="Bio (optional)" style="padding:9px 14px"/>
               <div class="flex gap-8">
-                <button class="btn btn-primary" style="flex:1;padding:9px" onclick="saveProfile()">${svgIcon('check',16)} Save</button>
-                <button class="btn btn-dark" style="flex:1;padding:9px" onclick="setState({_editProfile:false})">${svgIcon('x',16)} Cancel</button>
+                <button class="btn btn-primary" style="flex:1;padding:9px" onclick="saveProfile()">${svgIcon('check', 16)} Save</button>
+                <button class="btn btn-dark" style="flex:1;padding:9px" onclick="setState({_editProfile:false})">${svgIcon('x', 16)} Cancel</button>
               </div>
             </div>
-          `:`
+          `: `
             <div class="flex-between">
               <div>
                 <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${u.username}</div>
                 <div class="flex gap-8" style="margin-top:4px">
-                  <span class="tag ${u.role==='admin'?'tag-green':'tag-muted'}">${u.role==='admin'?'👑 Admin':'👤 Member'}</span>
-                  <span class="text-xs text-muted">Since ${u.joined||'?'}</span>
+                  <span class="tag ${u.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u.role === 'admin' ? '👑 Admin' : '👤 Member'}</span>
+                  <span class="text-xs text-muted">Since ${u.joined || '?'}</span>
                 </div>
-                ${u.bio?`<div class="text-muted" style="font-size:13px;margin-top:6px">${u.bio}</div>`:''}
+                ${u.bio ? `<div class="text-muted" style="font-size:13px;margin-top:6px">${u.bio}</div>` : ''}
               </div>
-              <button class="btn-icon" onclick="setState({_editProfile:true})">${svgIcon('edit',16)}</button>
+              <button class="btn-icon" onclick="setState({_editProfile:true})">${svgIcon('edit', 16)}</button>
             </div>
           `}
         </div>
       </div>
 
       <!-- Avatar colors (always visible when editing) -->
-      ${state._editProfile?`
+      ${state._editProfile ? `
         <div style="margin-bottom:16px">
           <div class="text-xs upper font-bold text-muted" style="margin-bottom:8px">Avatar Color</div>
           <div class="flex gap-8" style="flex-wrap:wrap">
-            ${AVATAR_COLORS.map(c=>`<button class="color-swatch ${u.avatarColor===c?'active':''}" style="background:${c}" onclick="updateAvatarColor('${c}')"></button>`).join('')}
+            ${AVATAR_COLORS.map(c => `<button class="color-swatch ${u.avatarColor === c ? 'active' : ''}" style="background:${c}" onclick="updateAvatarColor('${c}')"></button>`).join('')}
           </div>
         </div>
-      `:''}
+      `: ''}
 
       <!-- Stats -->
       <div class="grid-3">
-        ${[{v:stats.totalOrders,l:'Orders'},{v:stats.roundsHosted,l:'Hosted'},{v:`₹${stats.totalSpent}`,l:'Spent'}].map(i=>`
+        ${[{ v: stats.totalOrders, l: 'Orders' }, { v: stats.roundsHosted, l: 'Hosted' }, { v: `₹${stats.totalSpent}`, l: 'Spent' }].map(i => `
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
             <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${i.v}</div>
             <div class="text-xs text-muted upper" style="margin-top:2px">${i.l}</div>
@@ -1186,74 +2177,76 @@ function renderProfile(){
 
     <!-- Tabs -->
     <div class="tabs">
-      ${[{id:'overview',icon:'bar_chart',l:'Overview'},{id:'history',icon:'clock',l:'History'},{id:'settings',icon:'palette',l:'Settings'}].map(t=>`
-        <button class="tab ${tab===t.id?'active':''}" onclick="setState({_profileTab:'${t.id}'})">${t.l}</button>
+      ${[{ id: 'overview', icon: 'bar_chart', l: 'Overview' }, { id: 'history', icon: 'clock', l: 'History' }, { id: 'settings', icon: 'palette', l: 'Settings' }].map(t => `
+        <button class="tab ${tab === t.id ? 'active' : ''}" onclick="setState({_profileTab:'${t.id}'})">${t.l}</button>
       `).join('')}
     </div>
 
     <!-- Overview -->
-    ${tab==='overview'?`
+    ${tab === 'overview' ? `
       <div class="section-title" style="margin-bottom:8px">Badges</div>
       <div class="section-sub">${earnedBadges.length} / ${BADGES.length} unlocked</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px">
-        ${BADGES.map(b=>{const e=b.cond(stats);return`
-          <div class="badge-card ${e?'earned':''}">
+        ${BADGES.map(b => {
+        const e = b.cond(stats); return `
+          <div class="badge-card ${e ? 'earned' : ''}">
             <div class="badge-emoji">${b.icon}</div>
             <div class="badge-name">${b.label}</div>
-            ${!e?`<div class="text-xs text-muted" style="margin-top:2px">Locked</div>`:''}
+            ${!e ? `<div class="text-xs text-muted" style="margin-top:2px">Locked</div>` : ''}
           </div>
-        `;}).join('')}
+        `;
+      }).join('')}
       </div>
 
-      ${favItems.length>0?`
+      ${favItems.length > 0 ? `
         <div class="section-title" style="margin-bottom:8px">Favourites</div>
         <div class="section-sub">Your most ordered items</div>
         <div class="stack-8">
-          ${favItems.map(([name,count])=>`
+          ${favItems.map(([name, count]) => `
             <div class="card-sm" style="padding:13px 18px;display:flex;justify-content:space-between;align-items:center">
               <span class="font-bold" style="color:var(--text)">${name}</span>
               <span class="tag tag-green">×${count}</span>
             </div>
           `).join('')}
         </div>
-      `:''}
-    `:''}
+      `: ''}
+    `: ''}
 
     <!-- History -->
-    ${tab==='history'?`
+    ${tab === 'history' ? `
       <div class="section-title" style="margin-bottom:8px">Order History</div>
       <div class="section-sub">${userOrders.length} orders placed</div>
       <div class="stack-8">
-        ${userOrders.length===0?`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders yet.</div></div>`
-        :[...userOrders].reverse().map(o=>{
-          const sess=state.sessions.find(s=>s.id===o.sessionId);
-          const shop=state.shops.find(sh=>sh.id===sess?.shopId);
-          return`<div class="card-sm" style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
+        ${userOrders.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders yet.</div></div>`
+            : [...userOrders].reverse().map(o => {
+              const sess = state.sessions.find(s => s.id === o.sessionId);
+              const shop = state.shops.find(sh => sh.id === sess?.shopId);
+              return `<div class="card-sm" style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
             <div>
               <div class="tag tag-green" style="margin-bottom:3px">${o.sessionId}</div>
               <div class="font-bold" style="font-size:14px;color:var(--text)">${o.itemName} ×${o.quantity}</div>
-              <div class="text-xs text-muted">${shop?.name||'Unknown shop'}</div>
+              <div class="text-xs text-muted">${shop?.name || 'Unknown shop'}</div>
             </div>
-            <div class="font-black" style="color:var(--text2)">₹${o.price*o.quantity}</div>
+            <div class="font-black" style="color:var(--text2)">₹${o.price * o.quantity}</div>
           </div>`;
-        }).join('')}
+            }).join('')}
       </div>
-    `:''}
+    `: ''}
 
     <!-- Settings -->
-    ${tab==='settings'?`
+    ${tab === 'settings' ? `
       <div class="section-title" style="margin-bottom:8px">App Theme</div>
       <div class="section-sub">Choose your vibe</div>
       <div class="grid-2" style="margin-bottom:28px">
-        ${Object.entries(THEMES).map(([key,t])=>`
-          <div class="theme-card ${state.theme===key?'active':''}" style="background:${t.surface};border:2px solid ${state.theme===key?t.accent:t.border}" onclick="setTheme('${key}')">
+        ${Object.entries(THEMES).map(([key, t]) => `
+          <div class="theme-card ${state.theme === key ? 'active' : ''}" style="background:${t.surface};border:2px solid ${state.theme === key ? t.accent : t.border}" onclick="setTheme('${key}')">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <span style="font-size:18px">${{dark:'🌙',light:'☀️',warm:'🔥',neon:'⚡'}[key]}</span>
-              ${state.theme===key?`<span style="color:${t.accent};font-size:10px;font-weight:800">ACTIVE</span>`:''}
+              <span style="font-size:18px">${{ dark: '🌙', light: '☀️', warm: '🔥', neon: '⚡' }[key]}</span>
+              ${state.theme === key ? `<span style="color:${t.accent};font-size:10px;font-weight:800">ACTIVE</span>` : ''}
             </div>
             <div style="font-weight:800;font-size:14px;color:${t.text}">${t.name}</div>
             <div style="display:flex;gap:6px;margin-top:8px">
-              ${[t.accent,t.text,t['text2']].map(c=>`<div style="width:12px;height:12px;border-radius:50%;background:${c}"></div>`).join('')}
+              ${[t.accent, t.text, t['text2']].map(c => `<div style="width:12px;height:12px;border-radius:50%;background:${c}"></div>`).join('')}
             </div>
           </div>
         `).join('')}
@@ -1263,44 +2256,44 @@ function renderProfile(){
       <div class="card" style="overflow:hidden;padding:0">
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
           <span class="font-bold" style="color:var(--text)">Role</span>
-          <span class="tag ${u?.role==='admin'?'tag-green':'tag-muted'}">${u?.role}</span>
+          <span class="tag ${u?.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u?.role}</span>
         </div>
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
           <span class="font-bold" style="color:var(--text)">Member since</span>
-          <span class="text-muted text-sm">${u?.joined||'—'}</span>
+          <span class="text-muted text-sm">${u?.joined || '—'}</span>
         </div>
         <button onclick="handleLogout()" style="width:100%;padding:16px 20px;display:flex;align-items:center;gap:10px;color:var(--danger);font-weight:800;font-size:14px;font-family:'DM Sans',sans-serif;background:none;border:none;cursor:pointer;text-align:left">
-          ${svgIcon('logout',18)} Sign Out
+          ${svgIcon('logout', 18)} Sign Out
         </button>
       </div>
-    `:''}
+    `: ''}
   </div>`;
-}
+    }
 
-function saveProfile(){
-  const username=document.getElementById('edit-username')?.value?.trim();
-  const bio=document.getElementById('edit-bio')?.value?.trim()||'';
-  const pass=document.getElementById('edit-pass')?.value;
-  if(!username){toast('Username cannot be empty','error');return;}
-  if(state.users.find(u=>u.username===username&&u.id!==state.user.id)){toast('Username taken','error');return;}
-  const patch={username,bio};if(pass)patch.password=pass;
-  updateUser(patch);
-  DB.upsertUser({...state.user,...patch});
-  setState({_editProfile:false});toast('Profile updated!');
-}
-function updateAvatarColor(c){updateUser({avatarColor:c});DB.upsertUser({...state.user,avatarColor:c});setState({});}
-function setTheme(name){updateUser({theme:name});DB.upsertUser({...state.user,theme:name});setState({theme:name});applyTheme(name);toast(`Theme: ${THEMES[name].name}`);}
+    function saveProfile() {
+      const username = document.getElementById('edit-username')?.value?.trim();
+      const bio = document.getElementById('edit-bio')?.value?.trim() || '';
+      const pass = document.getElementById('edit-pass')?.value;
+      if (!username) { toast('Username cannot be empty', 'error'); return; }
+      if (state.users.find(u => u.username === username && u.id !== state.user.id)) { toast('Username taken', 'error'); return; }
+      const patch = { username, bio }; if (pass) patch.password = pass;
+      updateUser(patch);
+      DB.upsertUser({ ...state.user, ...patch });
+      setState({ _editProfile: false }); toast('Profile updated!');
+    }
+    function updateAvatarColor(c) { updateUser({ avatarColor: c }); DB.upsertUser({ ...state.user, avatarColor: c }); setState({}); }
+    function setTheme(name) { updateUser({ theme: name }); DB.upsertUser({ ...state.user, theme: name }); setState({ theme: name }); applyTheme(name); toast(`Theme: ${THEMES[name].name}`); }
 
-// ── MODALS ────────────────────────────────────────────────────────────────────
-function renderModals(){
-  if(!state.modal)return'';
-  const {type,data}=state.modal;
+    // ── MODALS ────────────────────────────────────────────────────────────────────
+    function renderModals() {
+      if (!state.modal) return '';
+      const { type, data } = state.modal;
 
-  if(type==='import'){
-    return`<div class="modal-overlay" onclick="if(event.target===this)setState({modal:null})">
+      if (type === 'import') {
+        return `<div class="modal-overlay" onclick="if(event.target===this)setState({modal:null})">
       <div class="modal-box">
         <div style="width:48px;height:48px;background:var(--accent-dim);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:18px">
-          ${svgIcon('file_code',22,'style="color:var(--accent)"')}
+          ${svgIcon('file_code', 22, 'style="color:var(--accent)"')}
         </div>
         <div class="font-syne font-black" style="font-size:20px;color:var(--text);margin-bottom:6px">Import Outlet</div>
         <div class="text-muted text-sm" style="margin-bottom:18px">Paste the JSON config shared by a colleague.</div>
@@ -1311,35 +2304,35 @@ function renderModals(){
         </div>
       </div>
     </div>`;
-  }
+      }
 
-  if(type==='share'){
-    const id=state.activeSessionId||'';
-    return`<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
+      if (type === 'share') {
+        const id = state.activeSessionId || '';
+        return `<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
       <div class="modal-sheet-box">
         <div class="font-syne font-black" style="font-size:24px;color:var(--text);margin-bottom:6px">Invite Teammates</div>
         <div class="text-muted text-sm" style="margin-bottom:24px">Share this code so colleagues can join the round</div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
           <span class="font-syne font-black text-accent" style="font-size:22px;letter-spacing:.08em">${id}</span>
-          <button class="btn-icon" onclick="navigator.clipboard.writeText('${id}');toast('Code copied!')">${svgIcon('copy',18)}</button>
+          <button class="btn-icon" onclick="navigator.clipboard.writeText('${id}');toast('Code copied!')">${svgIcon('copy', 18)}</button>
         </div>
         <button class="btn btn-primary w-full" onclick="setState({modal:null})">Done</button>
       </div>
     </div>`;
-  }
+      }
 
-  if(type==='split'){
-    const so=getSessionOrders();
-    const byUser=so.reduce((a,o)=>{if(!a[o.userId])a[o.userId]={name:o.userName,total:0,items:[]};a[o.userId].total+=o.price*o.quantity;a[o.userId].items.push(`${o.itemName}×${o.quantity}`);return a},{});
-    const users=Object.values(byUser);
-    const total=so.reduce((a,o)=>a+o.price*o.quantity,0);
-    return`<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
+      if (type === 'split') {
+        const so = getSessionOrders();
+        const byUser = so.reduce((a, o) => { if (!a[o.userId]) a[o.userId] = { name: o.userName, total: 0, items: [] }; a[o.userId].total += o.price * o.quantity; a[o.userId].items.push(`${o.itemName}×${o.quantity}`); return a }, {});
+        const users = Object.values(byUser);
+        const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
+        return `<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
       <div class="modal-sheet-box">
         <div class="font-syne font-black" style="font-size:24px;color:var(--text);margin-bottom:6px">Bill Split</div>
-        <div class="text-muted text-sm" style="margin-bottom:20px">₹${total} split among ${users.length} person${users.length!==1?'s':''}</div>
+        <div class="text-muted text-sm" style="margin-bottom:20px">₹${total} split among ${users.length} person${users.length !== 1 ? 's' : ''}</div>
         <div class="stack-8" style="margin-bottom:18px">
-          ${users.length===0?`<div class="empty-state"><div class="empty-text">No orders to split.</div></div>`
-          :users.map(u=>`
+          ${users.length === 0 ? `<div class="empty-state"><div class="empty-text">No orders to split.</div></div>`
+            : users.map(u => `
             <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
               <div>
                 <div class="font-bold" style="color:var(--text)">${u.name}</div>
@@ -1349,25 +2342,25 @@ function renderModals(){
             </div>
           `).join('')}
         </div>
-        ${users.length>0?`
+        ${users.length > 0 ? `
           <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
             <span class="font-bold" style="color:var(--accent-text)">Even split</span>
-            <span class="font-black text-accent" style="font-size:20px">₹${Math.ceil(total/users.length)}</span>
+            <span class="font-black text-accent" style="font-size:20px">₹${Math.ceil(total / users.length)}</span>
           </div>
-        `:''}
+        `: ''}
         <button class="btn btn-primary w-full" onclick="setState({modal:null})">Done</button>
       </div>
     </div>`;
-  }
+      }
 
-  if(type==='theme'){
-    return`<div class="modal-overlay" onclick="if(event.target===this)setState({modal:null})">
+      if (type === 'theme') {
+        return `<div class="modal-overlay" onclick="if(event.target===this)setState({modal:null})">
       <div class="modal-box">
         <div class="font-syne font-black" style="font-size:20px;color:var(--text);margin-bottom:18px">Choose Theme</div>
         <div class="grid-2" style="margin-bottom:18px">
-          ${Object.entries(THEMES).map(([key,t])=>`
-            <div class="theme-card ${state.theme===key?'active':''}" style="background:${t.surface};border:2px solid ${state.theme===key?t.accent:t.border};cursor:pointer" onclick="setTheme('${key}');setState({modal:null})">
-              <div style="font-size:20px;margin-bottom:8px">${{dark:'🌙',light:'☀️',warm:'🔥',neon:'⚡'}[key]}</div>
+          ${Object.entries(THEMES).map(([key, t]) => `
+            <div class="theme-card ${state.theme === key ? 'active' : ''}" style="background:${t.surface};border:2px solid ${state.theme === key ? t.accent : t.border};cursor:pointer" onclick="setTheme('${key}');setState({modal:null})">
+              <div style="font-size:20px;margin-bottom:8px">${{ dark: '🌙', light: '☀️', warm: '🔥', neon: '⚡' }[key]}</div>
               <div style="font-weight:800;font-size:14px;color:${t.text}">${t.name}</div>
             </div>
           `).join('')}
@@ -1375,67 +2368,67 @@ function renderModals(){
         <button class="btn btn-dark w-full" onclick="setState({modal:null})">Close</button>
       </div>
     </div>`;
-  }
+      }
 
-  if(type==='confirm'){
-    return`<div class="modal-overlay">
+      if (type === 'confirm') {
+        return `<div class="modal-overlay">
       <div class="modal-box" style="text-align:center;max-width:360px">
         <div style="font-size:40px;margin-bottom:14px">⚠️</div>
         <div class="font-syne font-black" style="font-size:18px;color:var(--text);margin-bottom:8px">Confirm</div>
-        <div class="text-muted text-sm" style="margin-bottom:22px">${data?.msg||''}</div>
+        <div class="text-muted text-sm" style="margin-bottom:22px">${data?.msg || ''}</div>
         <div class="flex gap-10">
           <button class="btn btn-dark" style="flex:1" onclick="setState({modal:null})">Cancel</button>
           <button class="btn btn-danger" style="flex:1" onclick="state._confirmCb&&state._confirmCb();setState({modal:null,_confirmCb:null})">Confirm</button>
         </div>
       </div>
     </div>`;
-  }
-  return'';
-}
+      }
+      return '';
+    }
 
-function confirmDelete(msg,cb){
-  state._confirmCb=cb;setState({modal:{type:'confirm',data:{msg}}});
-}
+    function confirmDelete(msg, cb) {
+      state._confirmCb = cb; setState({ modal: { type: 'confirm', data: { msg } } });
+    }
 
-// ── INSTALL BANNER ────────────────────────────────────────────────────────────
-let deferredInstall=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredInstall=e;
-  const banner=document.getElementById('install-banner');
-  if(banner)banner.classList.add('show');
-});
+    // ── INSTALL BANNER ────────────────────────────────────────────────────────────
+    let deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); deferredInstall = e;
+      const banner = document.getElementById('install-banner');
+      if (banner) banner.classList.add('show');
+    });
 
-function installApp(){
-  if(!deferredInstall)return;
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(()=>{deferredInstall=null;});
-  const banner=document.getElementById('install-banner');
-  if(banner)banner.classList.remove('show');
-}
+    function installApp() {
+      if (!deferredInstall) return;
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(() => { deferredInstall = null; });
+      const banner = document.getElementById('install-banner');
+      if (banner) banner.classList.remove('show');
+    }
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
-function render(){
-  applyTheme(state.theme);
-  const app=document.getElementById('app');
+    // ── RENDER ────────────────────────────────────────────────────────────────────
+    function render() {
+      applyTheme(state.theme);
+      const app = document.getElementById('app');
 
-  if(!state.user){
-    app.innerHTML=renderLogin();
-    document.getElementById('auth-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('auth-pass')?.focus();});
-    document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitAuth(state._loginReg||false);});
-    return;
-  }
+      if (!state.user) {
+        app.innerHTML = renderLogin();
+        document.getElementById('auth-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-pass')?.focus(); });
+        document.getElementById('auth-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(state._loginReg || false); });
+        return;
+      }
 
-  let pageHtml='';
-  const v=state.view;
-  if(v==='home')pageHtml=renderHome();
-  else if(v==='manage-shops')pageHtml=renderShops();
-  else if(v==='edit-menu')pageHtml=renderEditMenu();
-  else if(v==='create-session')pageHtml=renderCreateSession();
-  else if(v==='session')pageHtml=renderSession();
-  else if(v==='profile')pageHtml=renderProfile();
+      let pageHtml = '';
+      const v = state.view;
+      if (v === 'home') pageHtml = renderHome();
+      else if (v === 'manage-shops') pageHtml = renderShops();
+      else if (v === 'edit-menu') pageHtml = renderEditMenu();
+      else if (v === 'create-session') pageHtml = renderCreateSession();
+      else if (v === 'session') pageHtml = renderSession();
+      else if (v === 'profile') pageHtml = renderProfile();
 
-  app.innerHTML=`
-    <div id="install-banner" class="${deferredInstall?'show':''}">
+      app.innerHTML = `
+    <div id="install-banner" class="${deferredInstall ? 'show' : ''}">
       ☕ Install TeaRound as an app for the best experience!
       <button onclick="installApp()">Install</button>
       <button class="close-banner" onclick="this.parentElement.classList.remove('show')">×</button>
@@ -1445,26 +2438,27 @@ function render(){
     ${renderModals()}
   `;
 
-  // Re-attach event listeners that can't be inlined
-  document.getElementById('auth-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('auth-pass')?.focus();});
-  document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitAuth(state._loginReg||false);});
-  document.getElementById('join-code')?.addEventListener('keydown',e=>{if(e.key==='Enter')quickJoin();});
-  document.getElementById('session-shop')?.addEventListener('change',function(){
-    const shop=state.shops.find(s=>s.id===this.value);
-    state._newSessionShop=this.value;
-    state._newSessionLoc=shop?.address||'';
-    const locEl=document.getElementById('session-loc');
-    if(locEl)locEl.value=state._newSessionLoc;
-  });
-}
+      // Re-attach event listeners that can't be inlined
+      document.getElementById('auth-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-pass')?.focus(); });
+      document.getElementById('auth-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(state._loginReg || false); });
+      document.getElementById('join-code')?.addEventListener('keydown', e => { if (e.key === 'Enter') quickJoin(); });
+      document.getElementById('session-shop')?.addEventListener('change', function () {
+        const shop = state.shops.find(s => s.id === this.value);
+        state._newSessionShop = this.value;
+        state._newSessionLoc = shop?.address || '';
+        const locEl = document.getElementById('session-loc');
+        if (locEl) locEl.value = state._newSessionLoc;
+      });
+    }
 
-// ── BOOT ──────────────────────────────────────────────────────────────────────
-load(); // async — renders twice (localStorage first, then DB)
+    // ── BOOT ──────────────────────────────────────────────────────────────────────
+    load(); // async — renders twice (localStorage first, then DB)
 
-// Service worker
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
-}
-</script>
+    // Service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => { });
+    }
+  </script>
 </body>
+
 </html>
