@@ -24,19 +24,23 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent
+      -webkit-tap-highlight-color: transparent;
+      max-width: 100%
     }
 
     html {
       height: 100%;
-      -webkit-text-size-adjust: 100%
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+      overflow-x: hidden
     }
 
     body {
       height: 100%;
       font-family: 'DM Sans', system-ui, sans-serif;
       overflow-x: hidden;
-      background: #0d0d14
+      background: #0d0d14;
+      -webkit-font-smoothing: antialiased
     }
 
     input,
@@ -65,7 +69,6 @@
 
     /* ── CSS VARIABLES / THEMES ───────────────────────────────────────────────── */
     :root {
-      /* Dark theme (default) */
       --bg: #0d0d14;
       --surface: #141420;
       --surface2: #1a1a2e;
@@ -80,22 +83,26 @@
       --danger: #ff4466;
       --danger-dim: #ff446618;
       --warn: #f59e0b;
-      --shadow: 0 8px 40px #00000055;
+      --shadow: 0 4px 24px #00000055;
+      --shadow-md: 0 8px 40px #00000055;
       --shadow-accent: 0 8px 40px #00c89630;
       --nav-bg: #0d0d14ee;
-      --radius: 16px;
-      --radius-lg: 24px;
-      --radius-xl: 32px;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --sidebar-w: 256px;
+      --topbar-h: 64px;
+      --bnav-h: 64px;
     }
 
     [data-theme="light"] {
-      --bg: #f5f5f0;
+      --bg: #f4f4f0;
       --surface: #ffffff;
       --surface2: #f0f0ea;
-      --border: #e8e8e0;
-      --border2: #d8d8d0;
+      --border: #e2e2da;
+      --border2: #d0d0c8;
       --text: #1a1a2e;
-      --text2: #666688;
+      --text2: #55557a;
       --text3: #aaaacc;
       --accent: #00a87a;
       --accent-dim: #00a87a15;
@@ -103,7 +110,8 @@
       --danger: #e02050;
       --danger-dim: #e0205015;
       --warn: #d97706;
-      --shadow: 0 4px 24px #0000000a;
+      --shadow: 0 2px 12px #0000000d;
+      --shadow-md: 0 4px 24px #0000000a;
       --shadow-accent: 0 8px 32px #00a87a25;
       --nav-bg: #fffffff0;
     }
@@ -124,6 +132,7 @@
       --danger-dim: #e0503018;
       --warn: #f0a030;
       --shadow: 0 8px 40px #00000066;
+      --shadow-md: 0 8px 40px #00000066;
       --shadow-accent: 0 8px 40px #f0a03030;
       --nav-bg: #1a1208ee;
     }
@@ -144,34 +153,38 @@
       --danger-dim: #ff006615;
       --warn: #ffaa00;
       --shadow: 0 8px 60px #00000088;
+      --shadow-md: 0 8px 60px #00000088;
       --shadow-accent: 0 0 40px #00ffcc20;
       --nav-bg: #020208f0;
     }
 
-    /* ── LAYOUT ───────────────────────────────────────────────────────────────── */
+    /* ── APP SHELL ────────────────────────────────────────────────────────────── */
     #app {
       display: flex;
       min-height: 100vh;
+      min-height: 100dvh;
       background: var(--bg);
       color: var(--text);
       transition: background .3s, color .3s;
+      overflow-x: hidden;
+      width: 100%;
     }
 
-    /* Sidebar (desktop) */
+    /* ── SIDEBAR (desktop ≥1024px) ────────────────────────────────────────────── */
     #sidebar {
-      width: 260px;
+      width: var(--sidebar-w);
       flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      padding: 28px 20px;
+      padding: 24px 16px;
       position: fixed;
       top: 0;
       left: 0;
       bottom: 0;
       z-index: 100;
-      transition: transform .3s;
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
     }
 
     #sidebar .logo {
@@ -179,24 +192,25 @@
       align-items: center;
       gap: 12px;
       padding: 8px 12px;
-      margin-bottom: 36px
+      margin-bottom: 32px
     }
 
     #sidebar .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       background: var(--accent);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px var(--accent-dim)
     }
 
     #sidebar .logo-text {
       font-family: 'Syne', sans-serif;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--text);
       letter-spacing: -.3px
@@ -205,7 +219,7 @@
     #sidebar .logo-sub {
       font-size: 10px;
       color: var(--text2);
-      font-weight: 500;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .1em
     }
@@ -213,45 +227,58 @@
     #sidebar nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       flex: 1
     }
 
     #sidebar .nav-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: var(--radius);
+      gap: 11px;
+      padding: 11px 14px;
+      border-radius: 12px;
       color: var(--text2);
       font-weight: 600;
       font-size: 14px;
-      transition: all .2s;
+      transition: all .2s ease;
       text-decoration: none;
       background: none;
       border: none;
       width: 100%;
       text-align: left;
-      cursor: pointer
+      cursor: pointer;
     }
 
     #sidebar .nav-item:hover {
       background: var(--accent-dim);
-      color: var(--accent)
+      color: var(--accent);
+      transform: translateX(2px)
     }
 
     #sidebar .nav-item.active {
       background: var(--accent-dim);
-      color: var(--accent)
+      color: var(--accent);
+      box-shadow: inset 3px 0 0 var(--accent)
     }
 
     #sidebar .nav-item svg {
       width: 18px;
       height: 18px;
-      flex-shrink: 0
+      flex-shrink: 0;
+      opacity: .8;
+      transition: all .2s ease
     }
 
-    #sidebar .nav-item .nav-badge {
+    #sidebar .nav-item.active svg {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px var(--accent))
+    }
+
+    #sidebar .nav-item:hover svg {
+      opacity: 1
+    }
+
+    #sidebar .nav-badge {
       margin-left: auto;
       background: var(--accent);
       color: #000;
@@ -262,46 +289,60 @@
     }
 
     #sidebar .sidebar-footer {
-      padding-top: 20px;
+      padding-top: 16px;
       border-top: 1px solid var(--border)
     }
 
-    /* Main content */
+    /* ── MAIN CONTENT ─────────────────────────────────────────────────────────── */
     #main {
-      margin-left: 260px;
+      margin-left: var(--sidebar-w);
       flex: 1;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
-      flex-direction: column
+      flex-direction: column;
+      max-width: calc(100vw - var(--sidebar-w));
     }
 
     #topbar {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: var(--bg);
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
       border-bottom: 1px solid var(--border);
-      padding: 0 32px;
-      height: 64px;
+      padding: 0 28px;
+      height: var(--topbar-h);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: box-shadow .2s ease;
+    }
+
+    #topbar:has(+#main *:hover) {
+      box-shadow: 0 1px 0 var(--border2)
     }
 
     #topbar h1 {
       font-family: 'Syne', sans-serif;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
-      color: var(--text)
+      color: var(--text);
+      letter-spacing: -.2px
     }
 
+    /* Content area with safe max-width */
     #content {
-      padding: 32px;
-      flex: 1
+      padding: 28px;
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
     }
 
-    /* Bottom nav (mobile) */
+    /* ── BOTTOM NAV (mobile <768px) ───────────────────────────────────────────── */
     #bottom-nav {
       display: none;
       position: fixed;
@@ -310,11 +351,12 @@
       right: 0;
       background: var(--nav-bg);
       border-top: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
       z-index: 100;
-      display: none;
       justify-content: space-around;
+      height: calc(var(--bnav-h) + env(safe-area-inset-bottom, 0px));
     }
 
     #bottom-nav .bnav-item {
@@ -322,7 +364,7 @@
       flex-direction: column;
       align-items: center;
       gap: 3px;
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 12px;
       color: var(--text3);
       font-size: 10px;
@@ -332,31 +374,54 @@
       background: none;
       border: none;
       cursor: pointer;
-      transition: all .2s;
-      min-width: 60px
+      transition: all .2s ease;
+      min-width: 56px;
     }
 
     #bottom-nav .bnav-item svg {
       width: 22px;
-      height: 22px
+      height: 22px;
+      transition: all .2s ease
+    }
+
+    #bottom-nav .bnav-item:hover {
+      color: var(--text2);
+      background: var(--surface2)
     }
 
     #bottom-nav .bnav-item.active {
-      color: var(--accent)
+      color: var(--accent);
+      transform: scale(1.1) translateY(-1px);
+      background: var(--accent-dim);
     }
 
-    /* Responsive */
-    @media(max-width:768px) {
+    #bottom-nav .bnav-item.active svg {
+      filter: drop-shadow(0 0 8px var(--accent));
+      transform: scale(1.05);
+    }
+
+    #bottom-nav .bnav-item:active {
+      transform: scale(.93)
+    }
+
+    /* ── BREAKPOINTS ──────────────────────────────────────────────────────────── */
+    /* Tablet: 768–1023px — hide sidebar, show bottom nav, but keep content padded */
+    @media(max-width:1023px) {
       #sidebar {
         display: none
       }
 
       #main {
-        margin-left: 0
+        margin-left: 0;
+        max-width: 100vw;
+      }
+
+      #bottom-nav {
+        display: flex
       }
 
       #content {
-        padding: 20px 16px 90px
+        padding: 20px 16px calc(20px + var(--bnav-h) + env(safe-area-inset-bottom, 0px));
       }
 
       #topbar {
@@ -364,12 +429,83 @@
         height: 56px
       }
 
-      #bottom-nav {
-        display: flex
-      }
-
       #topbar h1 {
         font-size: 17px
+      }
+    }
+
+    /* Mobile: <480px — tighter padding */
+    @media(max-width:480px) {
+      #content {
+        padding: 16px 12px calc(16px + var(--bnav-h) + env(safe-area-inset-bottom, 0px))
+      }
+
+      #topbar {
+        padding: 0 12px
+      }
+
+      /* Stack flex rows vertically on small screens where needed */
+      .flex-between {
+        flex-wrap: wrap;
+        gap: 10px
+      }
+
+      /* Full-width buttons inside session header on mobile */
+      .session-header-actions {
+        flex-direction: column;
+        width: 100%
+      }
+
+      .session-header-actions .btn {
+        width: 100%;
+        justify-content: center
+      }
+
+      /* Ensure cards don't overflow */
+      .card,
+      .card-sm,
+      .form-section,
+      .profile-hero {
+        padding: 14px 14px
+      }
+
+      /* Bill panel full width */
+      .bill-panel {
+        width: 100%
+      }
+
+      /* Menu items: wrap qty/add on small screens */
+      .menu-item {
+        flex-wrap: wrap;
+        gap: 10px
+      }
+
+      .menu-item>.flex {
+        width: 100%;
+        justify-content: flex-end
+      }
+
+      /* Modal boxes: tighter padding */
+      .modal-box {
+        padding: 22px 18px
+      }
+
+      .modal-sheet-box {
+        padding: 22px 18px calc(22px + env(safe-area-inset-bottom, 0px))
+      }
+
+      /* Stat cards: bigger numbers, consistent spacing */
+      .stat-num {
+        font-size: 24px
+      }
+
+      .stat-card {
+        padding: 16px
+      }
+
+      /* Quick cards row on mobile */
+      .grid-2.quick-actions {
+        grid-template-columns: 1fr 1fr
       }
     }
 
@@ -377,104 +513,206 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow)
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+      border-color: var(--border2)
     }
 
     .card-sm {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius)
+      border-radius: 14px;
+      transition: border-color .2s ease
     }
 
+    .card-sm:hover {
+      border-color: var(--border2)
+    }
+
+    /* Inputs — 44px+ touch target */
     .inp {
       width: 100%;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 48px;
       color: var(--text);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
       font-family: 'DM Sans', sans-serif;
-      transition: border-color .2s;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      -webkit-appearance: none;
     }
 
     .inp:focus {
       border-color: var(--accent);
-      outline: none
+      box-shadow: 0 0 0 3px var(--accent-dim);
+      outline: none;
+      background: var(--surface);
+    }
+
+    .inp:hover:not(:focus) {
+      border-color: var(--border2)
     }
 
     .inp::placeholder {
       color: var(--text3)
     }
 
+    .inp[type="number"] {
+      -moz-appearance: textfield
+    }
+
+    .inp[type="number"]::-webkit-inner-spin-button,
+    .inp[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none
+    }
+
+    select.inp {
+      cursor: pointer
+    }
+
+    /* Textarea variant */
+    textarea.inp {
+      height: auto;
+      padding: 12px 16px;
+      resize: vertical;
+      min-height: 80px
+    }
+
+    /* Buttons */
     .btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 20px;
-      border-radius: var(--radius);
+      padding: 0 20px;
+      height: 44px;
+      border-radius: 12px;
       font-weight: 700;
       font-size: 14px;
       font-family: 'DM Sans', sans-serif;
-      transition: all .15s;
+      letter-spacing: .02em;
+      transition: all .2s ease;
       cursor: pointer;
-      border: none
+      border: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      transition: background .2s ease
     }
 
     .btn-primary {
       background: var(--accent);
-      color: #0a0a14
+      color: #0a0a14;
+      box-shadow: 0 4px 16px var(--accent-dim)
     }
 
     .btn-primary:hover {
-      filter: brightness(1.1)
+      filter: brightness(1.1);
+      box-shadow: 0 6px 24px var(--accent-dim);
+      transform: translateY(-1px)
+    }
+
+    .btn-primary:active {
+      transform: scale(.97) translateY(0);
+      filter: brightness(.98)
     }
 
     .btn-dark {
       background: var(--surface2);
       color: var(--text);
-      border: 1px solid var(--border2)
+      border: 1.5px solid var(--border2)
     }
 
     .btn-dark:hover {
       border-color: var(--accent);
-      color: var(--accent)
+      color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-1px)
+    }
+
+    .btn-dark:active {
+      transform: scale(.97) translateY(0)
     }
 
     .btn-danger {
       background: var(--danger-dim);
       color: var(--danger);
-      border: 1px solid var(--danger)
+      border: 1.5px solid var(--danger)
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--danger-dim)
+    }
+
+    .btn-danger:active {
+      transform: scale(.97) translateY(0)
     }
 
     .btn:disabled {
       opacity: .35;
-      cursor: not-allowed
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none !important
     }
 
+    .btn-sm {
+      height: 36px;
+      padding: 0 14px;
+      font-size: 13px;
+      border-radius: 10px
+    }
+
+    /* Icon buttons — 40px square touch target */
     .btn-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       background: var(--surface2);
       color: var(--text2);
       flex-shrink: 0;
-      transition: all .2s;
-      cursor: pointer
+      transition: all .2s ease;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-icon:hover {
       border-color: var(--accent);
-      color: var(--accent)
+      color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-1px)
     }
 
+    .btn-icon:active {
+      transform: scale(.93) translateY(0)
+    }
+
+    /* Tags/Badges */
     .tag {
       display: inline-flex;
       align-items: center;
@@ -502,9 +740,10 @@
       color: var(--text2)
     }
 
+    /* Typography utilities */
     .section-title {
       font-family: 'Syne', sans-serif;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--text);
       margin-bottom: 4px
@@ -514,7 +753,7 @@
       font-size: 12px;
       color: var(--text2);
       font-weight: 500;
-      margin-bottom: 20px
+      margin-bottom: 18px
     }
 
     .avatar {
@@ -534,64 +773,7 @@
       margin: 16px 0
     }
 
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: #000000aa;
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      animation: fadeIn .2s
-    }
-
-    .modal-sheet {
-      position: fixed;
-      inset: 0;
-      background: #000000aa;
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      animation: fadeIn .2s
-    }
-
-    .modal-box {
-      background: var(--surface);
-      border-radius: var(--radius-xl);
-      padding: 28px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: var(--shadow);
-      animation: slideUp .25s
-    }
-
-    .modal-sheet-box {
-      background: var(--surface);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-      padding: 28px 28px calc(28px + env(safe-area-inset-bottom));
-      width: 100%;
-      max-width: 500px;
-      animation: slideUp .25s;
-      max-height: 85vh;
-      overflow-y: auto
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px
-    }
-
+    /* Layout helpers */
     .flex {
       display: flex;
       align-items: center
@@ -603,8 +785,16 @@
       justify-content: space-between
     }
 
+    .gap-6 {
+      gap: 6px
+    }
+
     .gap-8 {
       gap: 8px
+    }
+
+    .gap-10 {
+      gap: 10px
     }
 
     .gap-12 {
@@ -642,6 +832,30 @@
       width: 100%
     }
 
+    /* Grid — collapses to 1 col on mobile */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px
+    }
+
+    @media(max-width:480px) {
+      .grid-2 {
+        grid-template-columns: 1fr
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    /* Text utilities */
     .text-accent {
       color: var(--accent)
     }
@@ -685,6 +899,7 @@
       white-space: nowrap
     }
 
+    /* Animations */
     @keyframes fadeIn {
       from {
         opacity: 0
@@ -698,7 +913,7 @@
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(20px)
+        transform: translateY(24px)
       }
 
       to {
@@ -710,7 +925,7 @@
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(12px)
+        transform: translateY(10px)
       }
 
       to {
@@ -719,12 +934,131 @@
       }
     }
 
-    /* ── PAGE-SPECIFIC STYLES ─────────────────────────────────────────────────── */
-    /* Login */
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .5
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(.85);
+        opacity: 0
+      }
+
+      70% {
+        transform: scale(1.05)
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      flex-shrink: 0
+    }
+
+    /* Micro-interactions: interactive elements only — NOT all * to avoid layout thrash */
+    a,
+    button,
+    .card,
+    .card-sm,
+    .session-row,
+    .menu-item,
+    .quick-card,
+    .badge-card,
+    .tab,
+    .bnav-item,
+    .btn,
+    .btn-icon,
+    .stat-card,
+    .theme-card,
+    .emoji-btn,
+    .qty-btn {
+      transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* ── MODALS ───────────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000000cc;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn .2s ease
+    }
+
+    .modal-sheet {
+      position: fixed;
+      inset: 0;
+      background: #000000cc;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s ease
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .4);
+      animation: slideUp .25s ease;
+      border: 1px solid var(--border2)
+    }
+
+    .modal-sheet-box {
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 28px 28px calc(28px + env(safe-area-inset-bottom, 0px));
+      width: 100%;
+      max-width: 500px;
+      animation: slideUp .25s ease;
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow-y: auto;
+      border: 1px solid var(--border2);
+      border-bottom: none
+    }
+
+    /* ── LOGIN PAGE ───────────────────────────────────────────────────────────── */
     #login-page {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
-      align-items: stretch
+      align-items: stretch;
+      background: var(--bg);
     }
 
     .login-left {
@@ -733,7 +1067,21 @@
       flex-direction: column;
       justify-content: center;
       padding: 60px;
-      max-width: 520px
+      max-width: 520px;
+    }
+
+    .login-form-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .18);
+      margin-top: 32px;
+      transition: box-shadow .2s ease;
+    }
+
+    .login-form-box:focus-within {
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .25)
     }
 
     .login-right {
@@ -745,34 +1093,37 @@
       justify-content: center;
       padding: 40px;
       position: relative;
-      overflow: hidden
+      overflow: hidden;
     }
 
     .login-right-content {
       text-align: center;
       position: relative;
-      z-index: 1
+      z-index: 1;
+      max-width: 340px
     }
 
     .login-deco {
       position: absolute;
-      width: 400px;
-      height: 400px;
+      width: 500px;
+      height: 500px;
       border-radius: 50%;
       background: var(--accent-dim);
-      filter: blur(80px);
+      filter: blur(100px);
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%)
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
 
-    @media(max-width:768px) {
+    @media(max-width:1023px) {
       #login-page {
-        flex-direction: column
+        flex-direction: column;
+        align-items: stretch
       }
 
       .login-left {
-        padding: 40px 28px;
+        padding: 40px 24px;
         max-width: 100%
       }
 
@@ -781,14 +1132,47 @@
       }
     }
 
-    /* Dashboard stats */
+    @media(max-width:480px) {
+      .login-left {
+        padding: 28px 16px
+      }
+
+      .login-form-box {
+        padding: 24px 20px
+      }
+    }
+
+    /* Error banner */
+    .auth-error {
+      background: var(--danger-dim);
+      border: 1.5px solid var(--danger);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: popIn .2s ease;
+    }
+
+    /* ── DASHBOARD STATS ──────────────────────────────────────────────────────── */
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
+      border-radius: 16px;
+      padding: 20px;
       position: relative;
-      overflow: hidden
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .12);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, .22);
+      border-color: var(--accent)
     }
 
     .stat-card::before {
@@ -798,19 +1182,20 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--accent)
+      background: var(--accent);
+      border-radius: 3px 3px 0 0
     }
 
     .stat-num {
       font-family: 'Syne', sans-serif;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 800;
       color: var(--text);
-      line-height: 1
+      line-height: 1.1
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text2);
       font-weight: 600;
       margin-top: 4px;
@@ -820,96 +1205,123 @@
 
     .stat-icon {
       position: absolute;
-      right: 20px;
-      top: 20px;
-      width: 40px;
-      height: 40px;
+      right: 18px;
+      top: 18px;
+      width: 38px;
+      height: 38px;
       border-radius: 10px;
       background: var(--accent-dim);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent)
+      color: var(--accent);
+      transition: transform .2s ease
     }
 
-    /* Session list */
+    .stat-card:hover .stat-icon {
+      transform: scale(1.1) rotate(-5deg)
+    }
+
+    /* ── SESSION ROW ──────────────────────────────────────────────────────────── */
     .session-row {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      border-radius: 16px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       cursor: pointer;
-      transition: all .2s
+      transition: all .2s ease;
     }
 
     .session-row:hover {
-      border-color: var(--border2);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow)
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .2)
+    }
+
+    .session-row:active {
+      transform: scale(.99) translateY(0)
     }
 
     .session-icon {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: 14px;
       background: var(--accent-dim);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 22px
+      font-size: 20px;
+      transition: transform .2s ease
     }
 
-    /* Menu item card */
+    .session-row:hover .session-icon {
+      transform: scale(1.05)
+    }
+
+    /* ── MENU ITEM ────────────────────────────────────────────────────────────── */
     .menu-item {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
+      border-radius: 16px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      transition: border-color .2s
+      gap: 12px;
+      transition: all .2s ease
     }
 
     .menu-item:hover {
-      border-color: var(--border2)
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .15)
     }
 
     .menu-emoji {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
       background: var(--surface2);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0
+      font-size: 22px;
+      flex-shrink: 0;
+      transition: transform .2s ease
     }
 
-    /* Bill panel */
+    .menu-item:hover .menu-emoji {
+      transform: scale(1.08)
+    }
+
+    /* ── BILL PANEL ───────────────────────────────────────────────────────────── */
     .bill-panel {
       background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      overflow: hidden
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .15)
     }
 
     .bill-header {
-      padding: 20px 24px;
+      padding: 18px 22px;
       border-bottom: 1px solid var(--border)
     }
 
     .bill-row {
-      padding: 12px 24px;
+      padding: 11px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border)
+      border-bottom: 1px solid var(--border);
+      transition: background .15s ease
+    }
+
+    .bill-row:hover {
+      background: var(--surface)
     }
 
     .bill-row:last-child {
@@ -918,95 +1330,107 @@
 
     .bill-total {
       background: var(--accent);
-      padding: 18px 24px;
+      padding: 16px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center
     }
 
-    /* Tabs */
+    /* ── TABS ─────────────────────────────────────────────────────────────────── */
     .tabs {
       display: flex;
       gap: 4px;
       background: var(--surface2);
-      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      border-radius: 14px;
       padding: 4px;
       margin-bottom: 24px
     }
 
     .tab {
       flex: 1;
-      padding: 8px 12px;
-      border-radius: calc(var(--radius) - 4px);
+      padding: 8px 10px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 700;
       color: var(--text2);
-      transition: all .2s;
+      transition: all .2s ease;
       text-align: center;
       cursor: pointer;
       background: none;
       border: none;
-      font-family: 'DM Sans', sans-serif
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap
     }
 
     .tab.active {
       background: var(--surface);
       color: var(--accent);
-      box-shadow: var(--shadow)
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .15)
     }
 
-    /* Badge grid */
+    .tab:hover:not(.active) {
+      color: var(--text);
+      background: var(--surface)
+    }
+
+    /* ── BADGES ───────────────────────────────────────────────────────────────── */
     .badge-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-radius: 16px;
       padding: 16px;
       text-align: center;
-      transition: all .2s
+      transition: all .2s ease
     }
 
     .badge-card.earned {
       border-color: var(--accent);
-      background: var(--accent-dim)
+      background: var(--accent-dim);
+      box-shadow: 0 4px 16px var(--accent-dim)
     }
 
     .badge-card:not(.earned) {
-      opacity: .45
+      opacity: .4
+    }
+
+    .badge-card.earned:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--accent-dim)
     }
 
     .badge-emoji {
-      font-size: 28px;
+      font-size: 26px;
       margin-bottom: 8px
     }
 
     .badge-name {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text)
     }
 
-    /* Theme picker */
+    /* ── THEME PICKER ─────────────────────────────────────────────────────────── */
     .theme-card {
-      border-radius: var(--radius-lg);
+      border-radius: 16px;
       padding: 16px;
-      border: 2px solid transparent;
+      border: 2px solid var(--border);
       cursor: pointer;
-      transition: all .2s;
+      transition: all .2s ease;
       position: relative
     }
 
     .theme-card.active {
-      border-color: var(--accent)
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .15)
     }
 
-    .theme-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block
+    .theme-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-1px)
     }
 
-    /* Toast */
+    /* ── TOAST ────────────────────────────────────────────────────────────────── */
     #toast-container {
       position: fixed;
       top: 20px;
@@ -1015,57 +1439,65 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      pointer-events: none
+      pointer-events: none;
+      max-width: 320px
     }
 
     @media(max-width:768px) {
       #toast-container {
         top: auto;
-        bottom: 90px;
+        bottom: calc(var(--bnav-h) + 12px + env(safe-area-inset-bottom, 0px));
         right: 12px;
-        left: 12px
+        left: 12px;
+        max-width: none
       }
     }
 
     .toast {
-      padding: 12px 18px;
-      border-radius: var(--radius);
+      padding: 13px 16px;
+      border-radius: 14px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: var(--shadow);
-      animation: fadeInUp .25s;
-      pointer-events: auto
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+      animation: fadeInUp .25s ease;
+      pointer-events: auto;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px)
     }
 
     .toast-success {
       background: var(--surface);
-      border: 1px solid var(--accent);
+      border: 1.5px solid var(--accent);
       color: var(--text)
     }
 
     .toast-error {
       background: var(--surface);
-      border: 1px solid var(--danger);
+      border: 1.5px solid var(--danger);
       color: var(--text)
     }
 
-    /* Qty stepper */
+    /* ── QTY STEPPER ──────────────────────────────────────────────────────────── */
     .qty-stepper {
       display: flex;
       align-items: center;
-      gap: 0;
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .2s ease
+    }
+
+    .qty-stepper:hover {
+      border-color: var(--border2)
     }
 
     .qty-btn {
-      width: 34px;
-      height: 34px;
+      width: 38px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1075,64 +1507,95 @@
       background: none;
       border: none;
       cursor: pointer;
-      transition: color .15s
+      transition: all .15s ease;
+      -webkit-tap-highlight-color: transparent
     }
 
     .qty-btn:hover {
-      color: var(--accent)
+      color: var(--accent);
+      background: var(--accent-dim)
+    }
+
+    .qty-btn:active {
+      transform: scale(.9)
     }
 
     .qty-num {
-      width: 28px;
+      width: 32px;
       text-align: center;
       font-size: 14px;
       font-weight: 800;
       color: var(--text)
     }
 
-    /* Empty state */
+    /* ── EMPTY STATE ──────────────────────────────────────────────────────────── */
     .empty-state {
       text-align: center;
-      padding: 48px 20px;
+      padding: 40px 20px;
       border: 2px dashed var(--border);
-      border-radius: var(--radius-xl)
+      border-radius: 20px;
+      transition: border-color .2s ease
+    }
+
+    .empty-state:hover {
+      border-color: var(--border2)
     }
 
     .empty-icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-      opacity: .5
+      font-size: 36px;
+      margin-bottom: 10px;
+      opacity: .4
     }
 
     .empty-text {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text3);
       font-style: italic
     }
 
-    /* Profile hero */
+    /* ── PROFILE HERO ─────────────────────────────────────────────────────────── */
     .profile-hero {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 28px;
-      margin-bottom: 24px
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .1);
+      transition: box-shadow .2s ease
     }
 
-    /* Desktop session layout */
-    @media(min-width:769px) {
+    .profile-hero:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .18)
+    }
+
+    /* ── SESSION LAYOUT ───────────────────────────────────────────────────────── */
+    @media(min-width:1024px) {
       .session-layout {
         display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 24px;
+        grid-template-columns: 1fr 340px;
+        gap: 22px;
         align-items: start
       }
     }
 
-    /* Scrollbar */
+    @media(max-width:1023px) {
+      .session-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 20px
+      }
+
+      .session-layout>*:last-child {
+        order: -1
+      }
+
+      /* Bill panel first on mobile */
+    }
+
+    /* ── SCROLLBAR ────────────────────────────────────────────────────────────── */
     ::-webkit-scrollbar {
-      width: 6px
+      width: 5px
     }
 
     ::-webkit-scrollbar-track {
@@ -1148,19 +1611,20 @@
       background: var(--text3)
     }
 
-    /* Install banner */
+    /* ── INSTALL BANNER ───────────────────────────────────────────────────────── */
     #install-banner {
       display: none;
       background: var(--accent);
       color: #0a0a14;
-      padding: 12px 20px;
+      padding: 10px 16px;
       font-size: 13px;
       font-weight: 700;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       position: sticky;
       top: 0;
-      z-index: 200
+      z-index: 200;
+      flex-wrap: wrap;
     }
 
     #install-banner.show {
@@ -1175,17 +1639,23 @@
       font-weight: 800;
       cursor: pointer;
       color: #0a0a14;
-      font-size: 12px
+      font-size: 12px;
+      white-space: nowrap
     }
 
     #install-banner .close-banner {
       background: none;
       margin-left: auto;
       font-size: 18px;
-      line-height: 1
+      line-height: 1;
+      padding: 4px
     }
 
-    /* Color picker */
+    #install-banner span {
+      flex: 1
+    }
+
+    /* ── COLOR PICKER ─────────────────────────────────────────────────────────── */
     .color-swatch {
       width: 28px;
       height: 28px;
@@ -1197,54 +1667,64 @@
     }
 
     .color-swatch.active {
-      border-color: var(--text)
+      border-color: var(--text);
+      transform: scale(1.1)
     }
 
-    /* Join code input (large) */
+    /* ── JOIN CODE INPUT ──────────────────────────────────────────────────────── */
     .code-input {
       background: var(--surface2);
       border: 2px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      font-size: 22px;
+      border-radius: 14px;
+      padding: 0 20px;
+      height: 58px;
+      font-size: 20px;
       font-weight: 800;
       font-family: 'Syne', sans-serif;
       color: var(--text);
       text-transform: uppercase;
-      letter-spacing: .15em;
+      letter-spacing: .12em;
       width: 100%;
       text-align: center;
-      transition: border-color .2s
+      transition: all .2s ease;
+      -webkit-appearance: none;
     }
 
     .code-input:focus {
-      border-color: var(--accent)
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-dim);
+      outline: none;
+      background: var(--surface)
     }
 
-    /* Locked/closed banner */
+    .code-input:hover:not(:focus) {
+      border-color: var(--border2)
+    }
+
+    /* ── STATUS BANNERS ───────────────────────────────────────────────────────── */
     .status-banner {
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
+      border-radius: 14px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
       gap: 12px;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 14px
     }
 
     .status-banner-locked {
       background: var(--danger-dim);
-      border: 1px solid var(--danger);
+      border: 1.5px solid var(--danger);
       color: var(--danger)
     }
 
     .status-banner-closed {
       background: var(--surface2);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       color: var(--text2)
     }
 
-    /* Emoji picker */
+    /* ── EMOJI PICKER ─────────────────────────────────────────────────────────── */
     .emoji-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
@@ -1253,27 +1733,52 @@
 
     .emoji-btn {
       padding: 8px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       background: var(--surface2);
       border: 2px solid transparent;
       cursor: pointer;
-      transition: all .15s;
-      text-align: center
+      transition: all .15s ease;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent
     }
 
     .emoji-btn.active {
       border-color: var(--accent);
-      background: var(--accent-dim)
+      background: var(--accent-dim);
+      transform: scale(1.08)
     }
 
-    @media(max-width:500px) {
+    .emoji-btn:hover:not(.active) {
+      border-color: var(--border2);
+      transform: scale(1.04);
+      background: var(--surface)
+    }
+
+    @media(max-width:480px) {
       .emoji-grid {
         grid-template-columns: repeat(6, 1fr)
       }
     }
 
-    /* Navigation label hidden on sm screens when icon only */
+    /* ── FORM SECTION ─────────────────────────────────────────────────────────── */
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .08)
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+      display: block
+    }
   </style>
 </head>
 
@@ -1282,16 +1787,27 @@
   <div id="toast-container"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
   <script>
     // ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
     // 👉 Replace these two values with your own from Supabase → Settings → API
+    // ⚠️  RLS NOTE: If you have Row Level Security enabled on your Supabase tables,
+    //     make sure to add policies that allow INSERT, UPDATE, SELECT, and DELETE
+    //     for the anon role (or authenticated role if using Supabase Auth).
+    //     Without RLS policies, all DB writes will silently fail.
     const SUPABASE_URL = 'https://ijomccrisaffrrlbonuk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlqb21jY3Jpc2FmZnJybGJvbnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTI0NDcsImV4cCI6MjA5MDA2ODQ0N30.UGJj1gBn3bxMjxKuROW01Wb40oprpoaxjD_Y2Az1C7k';
 
     let _db = null;
     function getDB() {
-      if (!_db && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-        _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+        // Supabase not configured — using localStorage fallback
+        return null;
+      }
+      if (!_db) {
+        _db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
       }
       return _db;
     }
@@ -1318,23 +1834,38 @@
 
       async upsertUser(u) {
         const db = getDB(); if (!db) return;
-        await db.from('users').upsert({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatar_color: u.avatarColor, bio: u.bio || '', theme: u.theme || 'dark' });
+        try {
+          const { error } = await db.from('users').upsert({ id: u.id, username: u.username, password: u.password, role: u.role, joined: u.joined, avatar_color: u.avatarColor, bio: u.bio || '', theme: u.theme || 'dark' });
+          if (error) { console.error('upsertUser error:', error); toast('Failed to save user to DB', 'error'); }
+        } catch (e) { console.error('upsertUser exception:', e); }
       },
       async upsertShop(s) {
         const db = getDB(); if (!db) return;
-        await db.from('shops').upsert({ id: s.id, name: s.name, address: s.address, creator_id: s.creatorId, menu: s.menu });
+        try {
+          const { error } = await db.from('shops').upsert({ id: s.id, name: s.name, address: s.address, creator_id: s.creatorId, menu: s.menu });
+          if (error) { console.error('upsertShop error:', error); }
+        } catch (e) { console.error('upsertShop exception:', e); }
       },
       async deleteShop(id) {
         const db = getDB(); if (!db) return;
-        await db.from('shops').delete().eq('id', id);
+        try {
+          const { error } = await db.from('shops').delete().eq('id', id);
+          if (error) { console.error('deleteShop error:', error); toast('Failed to delete from DB', 'error'); }
+        } catch (e) { console.error('deleteShop exception:', e); }
       },
       async upsertSession(s) {
         const db = getDB(); if (!db) return;
-        await db.from('sessions').upsert({ id: s.id, shop_id: s.shopId, creator_id: s.creatorId, location: s.location, locked: s.locked || false, closed: s.closed || false });
+        try {
+          const { error } = await db.from('sessions').upsert({ id: s.id, shop_id: s.shopId, creator_id: s.creatorId, location: s.location, locked: s.locked || false, closed: s.closed || false });
+          if (error) { console.error('upsertSession error:', error); }
+        } catch (e) { console.error('upsertSession exception:', e); }
       },
       async upsertOrder(o) {
         const db = getDB(); if (!db) return;
-        await db.from('orders').upsert({ id: o.id, session_id: o.sessionId, user_id: o.userId, user_name: o.userName, item_id: o.itemId, item_name: o.itemName, price: o.price, quantity: o.quantity, note: o.note || '' });
+        try {
+          const { error } = await db.from('orders').upsert({ id: o.id, session_id: o.sessionId, user_id: o.userId, user_name: o.userName, item_id: o.itemId, item_name: o.itemName, price: o.price, quantity: o.quantity, note: o.note || '' });
+          if (error) { console.error('upsertOrder error:', error); toast('Failed to save order to DB', 'error'); }
+        } catch (e) { console.error('upsertOrder exception:', e); }
       },
       async deleteOrder(id) {
         const db = getDB(); if (!db) return;
@@ -1377,16 +1908,22 @@
       state.users = g(SK.USERS, '[]');
     }
     async function load() {
-      const g = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb) } catch { return JSON.parse(fb) } };
-      state.theme = localStorage.getItem(SK.THEME) || 'dark';
-      const auth = g(SK.AUTH, 'null');
-      if (auth) { state.user = auth; state.view = 'home'; }
-      applyTheme(state.theme);
-      render(); // render immediately with localStorage data
-      const usedDB = await DB.loadAll();
-      if (!usedDB) { loadFromLocalStorage(); }
-      else { localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); } // keep auth in localStorage
-      render(); // re-render with DB data
+      try {
+        const g = (k, fb) => { try { return JSON.parse(localStorage.getItem(k) || fb) } catch { return JSON.parse(fb) } };
+        state.theme = localStorage.getItem(SK.THEME) || 'dark';
+        const auth = g(SK.AUTH, 'null');
+        if (auth) { state.user = auth; state.view = 'home'; }
+        applyTheme(state.theme);
+        render(); // render immediately with localStorage data
+        const usedDB = await DB.loadAll();
+        if (!usedDB) { loadFromLocalStorage(); }
+        else { localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); } // keep auth in localStorage
+        render(); // re-render with DB data
+      } catch (e) {
+        console.error('Boot load failed', e);
+        loadFromLocalStorage();
+        render();
+      }
     }
     function save() {
       // Always persist auth + theme locally; data synced to DB per-operation
@@ -1430,24 +1967,42 @@
 
     // ── AUTH ─────────────────────────────────────────────────────────────────────
     function handleAuth(username, password, isReg) {
-      if (!username.trim() || !password.trim()) { toast('Fill all fields', 'error'); return; }
+      const u = username.trim().toLowerCase();
+      const p = password;
+      if (!u || !p) {
+        state._authError = 'Please fill in all fields';
+        save(); render(); return;
+      }
+      if (p.length < 3) {
+        state._authError = 'Password must be at least 3 characters';
+        save(); render(); return;
+      }
+
       if (isReg) {
-        if (state.users.find(u => u.username === username)) { toast('Username taken', 'error'); return; }
+        if (state.users.find(x => x.username.toLowerCase() === u)) {
+          state._authError = 'Username already taken — try another';
+          save(); render(); return;
+        }
         const nu = {
-          id: gid(), username: username.trim(), password, role: state.users.length === 0 ? 'admin' : 'user',
+          id: gid(), username: u, password: p, role: state.users.length === 0 ? 'admin' : 'user',
           joined: new Date().toLocaleDateString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], bio: '', theme: 'dark'
         };
         state.users.push(nu); state.user = nu;
-        DB.upsertUser(nu); // sync to Supabase
+        DB.upsertUser(nu);
         toast('Account created! Welcome 🎉');
+        setState({ view: 'home', _loginName: '', _loginPass: '', _showPass: false, _authError: null });
       } else {
-        const found = state.users.find(u => u.username === username && u.password === password);
-        if (!found) { toast('Incorrect credentials', 'error'); return; }
+        const found = state.users.find(x => x.username.toLowerCase() === u && x.password === p);
+        if (!found) {
+          state._authError = 'Invalid username or password';
+          save(); render(); return;
+        }
         state.user = found;
-        if (found.theme) setState({ theme: found.theme });
+        const userTheme = found.theme || 'dark';
         toast(`Welcome back, ${found.username}!`);
+        setState({ view: 'home', theme: userTheme, _loginName: '', _loginPass: '', _showPass: false, _authError: null });
+        applyTheme(userTheme);
       }
-      setState({ view: 'home' });
     }
 
     function updateUser(patch) {
@@ -1505,20 +2060,27 @@
     }
 
     function avatarHtml(u, size = 40, radius = 12) {
-      const c = u?.avatarColor || AVATAR_COLORS[0];
+      // Use accent CSS variable (theme color) instead of per-user avatarColor
       const fs = Math.round(size * .38);
-      return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:${c};font-size:${fs}px">${(u?.username || '?')[0].toUpperCase()}</div>`;
+      return `<div class="avatar" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:var(--accent);font-size:${fs}px;color:#0a0a14">${(u?.username || '?')[0].toUpperCase()}</div>`;
     }
 
     // ── EXPORT / IMPORT ──────────────────────────────────────────────────────────
     function exportShop(shop) {
+      if (!shop) { toast('Shop not found', 'error'); return; }
+      if (!shop.menu || shop.menu.length === 0) { toast('Menu is empty — nothing to export', 'error'); return; }
       const data = JSON.stringify({ name: shop.name, address: shop.address, menu: shop.menu.map(({ name, price, emoji }) => ({ name, price, emoji })) }, null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `TeaRound_${shop.name.replace(/\s+/g, '_')}.json`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      navigator.clipboard.writeText(data).catch(() => { });
-      toast(`${shop.name} exported!`);
+      // PRIMARY: copy to clipboard
+      navigator.clipboard.writeText(data)
+        .then(() => toast(`${shop.name} JSON copied to clipboard ✅`))
+        .catch(() => toast('Failed to copy JSON', 'error'));
+      // SECONDARY: also trigger file download
+      try {
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `TeaRound_${shop.name.replace(/\s+/g, '_')}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      } catch (e) { console.warn('File download failed', e); }
     }
 
     function importShop(json) {
@@ -1531,19 +2093,38 @@
       } catch { toast('Invalid JSON format', 'error'); }
     }
 
-    function downloadSummary() {
-      const session = getSession(), shop = getSessionShop(), so = getSessionOrders();
-      const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
-      const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
-      let c = `TEA ROUND SUMMARY\nID: ${session?.id}\nShop: ${shop?.name}\nLocation: ${session?.location}\nDate: ${new Date().toLocaleString()}\n${'─'.repeat(32)}\n\nGROUP TOTALS:\n`;
-      agg.forEach(([n, q]) => { c += `  • ${n}: ×${q}\n`; });
-      c += `\nBILL: ₹${total}\n\nINDIVIDUAL ORDERS:\n`;
-      so.forEach(o => { c += `  • ${o.userName}: ${o.itemName} ×${o.quantity} = ₹${o.price * o.quantity}\n`; });
-      const blob = new Blob([c], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob); const a = document.createElement('a');
-      a.href = url; a.download = `TeaRound_${state.activeSessionId}.txt`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      toast('Summary downloaded!');
+    async function downloadSummary() {
+      try {
+        const session = getSession(), shop = getSessionShop(), so = getSessionOrders();
+        if (!session) { toast('No active session', 'error'); return; }
+        if (so.length === 0) { toast('No orders to export', 'error'); return; }
+        // Try PNG capture first
+        const node = document.getElementById('app');
+        if (node && typeof htmlToImage !== 'undefined') {
+          toast('Capturing screenshot…');
+          try {
+            const dataUrl = await htmlToImage.toPng(node, { quality: 1, pixelRatio: 2 });
+            const link = document.createElement('a');
+            link.download = `TeaRound_${state.activeSessionId}.png`;
+            link.href = dataUrl;
+            link.click();
+            toast('Screenshot saved as PNG!');
+            return;
+          } catch (imgErr) { console.warn('Image capture failed, falling back to text', imgErr); }
+        }
+        // Fallback: text summary
+        const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
+        const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
+        let c = `TEA ROUND SUMMARY\nID: ${session?.id}\nShop: ${shop?.name}\nLocation: ${session?.location}\nDate: ${new Date().toLocaleString()}\n${'─'.repeat(32)}\n\nGROUP TOTALS:\n`;
+        agg.forEach(([n, q]) => { c += `  • ${n}: ×${q}\n`; });
+        c += `\nBILL: ₹${total}\n\nINDIVIDUAL ORDERS:\n`;
+        so.forEach(o => { c += `  • ${o.userName}: ${o.itemName} ×${o.quantity} = ₹${o.price * o.quantity}\n`; });
+        const blob = new Blob([c], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a');
+        a.href = url; a.download = `TeaRound_${state.activeSessionId}.txt`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        toast('Summary downloaded!');
+      } catch (err) { console.error('Download failed', err); toast('Download failed', 'error'); }
     }
 
     // ── RENDER PAGES ─────────────────────────────────────────────────────────────
@@ -1565,20 +2146,36 @@
       <p class="text-muted" style="margin-bottom:36px;font-size:15px">
         ${isReg ? 'Join your team on TeaRound Pro' : 'Sign in to manage your rounds'}
       </p>
-      <div class="stack-12">
-        <input id="auth-name" class="inp" placeholder="Username" autocomplete="username" value="${state._loginName || ''}"/>
-        <div style="position:relative">
-          <input id="auth-pass" class="inp" type="${state._showPass ? 'text' : 'password'}" placeholder="Password" autocomplete="${isReg ? 'new-password' : 'current-password'}" value="${state._loginPass || ''}"/>
-          <button onclick="setState({_showPass:!state._showPass})" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text2);background:none;border:none;cursor:pointer;display:flex">
-            ${svgIcon(state._showPass ? 'eye_off' : 'eye', 17)}
+      <div class="login-form-box">
+        <div class="stack-12">
+          <div>
+            <label class="form-label">Username</label>
+            <input id="auth-name" class="inp" placeholder="Enter your username" autocomplete="username"
+              value="${(state._loginName || '').replace(/"/g, '&quot;')}"
+              oninput="state._loginName=this.value"/>
+          </div>
+          <div>
+            <label class="form-label">Password</label>
+            <div style="position:relative">
+              <input id="auth-pass" class="inp" type="${state._showPass ? 'text' : 'password'}"
+                placeholder="Enter your password"
+                autocomplete="${isReg ? 'new-password' : 'current-password'}"
+                value="${(state._loginPass || '').replace(/"/g, '&quot;')}"
+                oninput="state._loginPass=this.value"
+                style="padding-right:48px"/>
+              <button type="button" onclick="togglePassVis()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text2);background:none;border:none;cursor:pointer;display:flex;padding:4px;border-radius:6px" tabindex="-1">
+                ${svgIcon(state._showPass ? 'eye_off' : 'eye', 17)}
+              </button>
+            </div>
+          </div>
+          ${state._authError ? `<div class="auth-error">${svgIcon('x', 14)} ${state._authError}</div>` : ''}
+          <button class="btn btn-primary w-full" style="margin-top:4px;height:48px;font-size:15px" onclick="submitAuth(${isReg})">
+            ${svgIcon('arrow_right', 18)} ${isReg ? 'Create Account' : 'Sign In'}
+          </button>
+          <button type="button" onclick="state._loginName=document.getElementById('auth-name')?.value||state._loginName||'';state._loginPass=document.getElementById('auth-pass')?.value||state._loginPass||'';setState({_loginReg:${!isReg},_authError:null})" style="color:var(--text2);font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:center;padding:8px">
+            ${isReg ? 'Already have an account? Sign in →' : 'New here? Create an account →'}
           </button>
         </div>
-        <button class="btn btn-primary w-full" style="margin-top:4px;padding:14px" onclick="submitAuth(${isReg})">
-          ${svgIcon('arrow_right', 18)} ${isReg ? 'Create Account' : 'Sign In'}
-        </button>
-        <button onclick="setState({_loginReg:${!isReg}})" style="color:var(--text2);font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:center;padding:8px">
-          ${isReg ? 'Already have an account? Sign in →' : 'New here? Create an account →'}
-        </button>
       </div>
     </div>
     <div class="login-right">
@@ -1600,8 +2197,22 @@
     function submitAuth(isReg) {
       const name = document.getElementById('auth-name')?.value || '';
       const pass = document.getElementById('auth-pass')?.value || '';
+      // Store values before any render that could reset inputs
       state._loginName = name; state._loginPass = pass;
       handleAuth(name, pass, isReg);
+    }
+
+    // Eye toggle: read live value first, update state, re-render keeps value via state
+    function togglePassVis() {
+      const pass = document.getElementById('auth-pass')?.value || '';
+      state._loginPass = pass;
+      state._showPass = !state._showPass;
+      save(); render();
+      // Restore caret to end after re-render
+      requestAnimationFrame(() => {
+        const el = document.getElementById('auth-pass');
+        if (el) { el.focus(); const len = el.value.length; el.setSelectionRange(len, len); }
+      });
     }
 
     function renderNav() {
@@ -1645,7 +2256,9 @@
     }
 
     function handleLogout() {
-      state.user = null; setState({ view: 'login' });
+      state.user = null;
+      state._loginName = ''; state._loginPass = ''; state._showPass = false; state._authError = null;
+      setState({ view: 'login' });
       toast('Signed out');
     }
 
@@ -1708,15 +2321,15 @@
 
     <!-- Quick actions -->
     <div class="grid-2" style="margin-bottom:28px">
-      <button class="card" style="padding:22px;text-align:left;cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-xl);transition:all .2s" onclick="setState({view:'create-session'})" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--accent)">${svgIcon('plus', 22)}</div>
+      <button class="quick-card" onclick="setState({view:'create-session'})">
+        <div class="quick-card-icon" style="background:var(--accent-dim);color:var(--accent)">${svgIcon('plus', 22)}</div>
         <div class="font-syne font-black" style="font-size:15px;color:var(--text);margin-bottom:4px">New Round</div>
         <div class="text-xs text-muted">Start a group order</div>
       </button>
-      <button class="card" style="padding:22px;text-align:left;cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-xl);transition:all .2s" onclick="setState({view:'manage-shops'})" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--text2)">${svgIcon('store', 22)}</div>
+      <button class="quick-card" onclick="setState({view:'manage-shops'})">
+        <div class="quick-card-icon" style="background:var(--surface2);color:var(--text2)">${svgIcon('store', 22)}</div>
         <div class="font-syne font-black" style="font-size:15px;color:var(--text);margin-bottom:4px">Manage Shops</div>
-        <div class="text-xs text-muted">Add outlets & menus</div>
+        <div class="text-xs text-muted">Add outlets &amp; menus</div>
       </button>
     </div>
 
@@ -1771,8 +2384,8 @@
     function quickJoin() {
       const code = (document.getElementById('join-code')?.value || '').trim().toUpperCase();
       if (!code) { toast('Enter a round code', 'error'); return; }
-      const s = state.sessions.find(s => s.id === code);
-      if (s) { goToSession(code); } else { toast('Round not found', 'error'); }
+      const s = state.sessions.find(s => s.id === code || (s.joinCode && s.joinCode.trim().toUpperCase() === code));
+      if (s) { goToSession(s.id); } else { toast('Invalid code — round not found', 'error'); }
     }
     function goToSession(id) { setState({ activeSessionId: id, view: 'session' }); }
 
@@ -1788,12 +2401,18 @@
       </button>
     </div>
 
-    <div class="card" style="padding:20px;margin-bottom:24px">
+    <div class="form-section" style="margin-bottom:24px">
       <div class="font-bold" style="margin-bottom:14px;color:var(--text2);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Add New Outlet</div>
       <div class="stack-8">
-        <input id="shop-name" class="inp" placeholder="Shop name"/>
-        <input id="shop-addr" class="inp" placeholder="Address / Location"/>
-        <button class="btn btn-primary w-full" onclick="createShop()">
+        <div>
+          <label class="form-label">Shop Name</label>
+          <input id="shop-name" class="inp" placeholder="e.g. Chai Corner"/>
+        </div>
+        <div>
+          <label class="form-label">Address / Location</label>
+          <input id="shop-addr" class="inp" placeholder="e.g. 3rd Floor Pantry"/>
+        </div>
+        <button class="btn btn-primary w-full" style="margin-top:4px" onclick="createShop()">
           ${svgIcon('plus', 18)} Create Outlet
         </button>
       </div>
@@ -1810,7 +2429,7 @@
           </div>
           <div class="flex gap-8">
             <button class="btn-icon" onclick="exportShop(state.shops.find(sh=>sh.id==='${s.id}'))" title="Export">${svgIcon('download', 16)}</button>
-            <button class="btn-icon" style="color:var(--danger)" onclick="confirmDelete('Remove \\"${s.name}\\"?',()=>{DB.deleteShop('${s.id}');state.shops=state.shops.filter(sh=>sh.id!=='${s.id}');setState({});})" title="Delete">${svgIcon('trash', 16)}</button>
+            <button class="btn-icon" style="color:var(--danger)" onclick="confirmDelete('Remove &quot;${s.name}&quot;?',async()=>{try{await DB.deleteShop('${s.id}');state.shops=state.shops.filter(sh=>sh.id!=='${s.id}');setState({});toast('Shop deleted');}catch(e){console.error(e);toast('Delete failed','error');}})" title="Delete">${svgIcon('trash', 16)}</button>
           </div>
         </div>
       `).join('')}
@@ -1819,13 +2438,15 @@
     }
 
     function createShop() {
-      const name = document.getElementById('shop-name')?.value?.trim();
-      const addr = document.getElementById('shop-addr')?.value?.trim();
-      if (!name || !addr) { toast('Fill both fields', 'error'); return; }
-      const shop = { id: gid(), name, address: addr, menu: [], creatorId: state.user.id };
-      state.shops.push(shop);
-      DB.upsertShop(shop);
-      setState({}); toast('Outlet created!');
+      try {
+        const name = document.getElementById('shop-name')?.value?.trim();
+        const addr = document.getElementById('shop-addr')?.value?.trim();
+        if (!name || !addr) { toast('Fill both fields', 'error'); return; }
+        const shop = { id: gid(), name, address: addr, menu: [], creatorId: state.user.id };
+        state.shops.push(shop);
+        DB.upsertShop(shop);
+        setState({}); toast('Outlet created! 🏪');
+      } catch (e) { console.error('createShop failed', e); toast('Failed to create shop', 'error'); }
     }
 
     // ── EDIT MENU ─────────────────────────────────────────────────────────────────
@@ -1871,20 +2492,24 @@
     }
 
     function addMenuItem(shopId) {
-      const name = document.getElementById('item-name')?.value?.trim();
-      const price = document.getElementById('item-price')?.value;
-      if (!name) { toast('Enter item name', 'error'); return; }
-      const emoji = state._menuEmoji || '🍵';
-      state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: [...s.menu, { id: gid(), name, price: parseFloat(price) || 0, emoji }] } : s);
-      const updatedShop = state.shops.find(s => s.id === shopId);
-      DB.upsertShop(updatedShop);
-      setState({ _menuEmoji: emoji }); toast('Item added!');
+      try {
+        const name = document.getElementById('item-name')?.value?.trim();
+        const price = document.getElementById('item-price')?.value;
+        if (!name) { toast('Enter item name', 'error'); return; }
+        const emoji = state._menuEmoji || '🍵';
+        state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: [...s.menu, { id: gid(), name, price: parseFloat(price) || 0, emoji }] } : s);
+        const updatedShop = state.shops.find(s => s.id === shopId);
+        DB.upsertShop(updatedShop);
+        setState({ _menuEmoji: emoji }); toast('Item added!');
+      } catch (e) { console.error('addMenuItem failed', e); toast('Failed to add item', 'error'); }
     }
     function removeMenuItem(shopId, itemId) {
-      state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: s.menu.filter(m => m.id !== itemId) } : s);
-      const updatedShop = state.shops.find(s => s.id === shopId);
-      DB.upsertShop(updatedShop);
-      setState({}); toast('Item removed');
+      try {
+        state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: s.menu.filter(m => m.id !== itemId) } : s);
+        const updatedShop = state.shops.find(s => s.id === shopId);
+        DB.upsertShop(updatedShop);
+        setState({}); toast('Item removed');
+      } catch (e) { console.error('removeMenuItem failed', e); toast('Failed to remove item', 'error'); }
     }
 
     // ── CREATE SESSION ────────────────────────────────────────────────────────────
@@ -1920,15 +2545,17 @@
     }
 
     function createSession() {
-      const shopId = document.getElementById('session-shop')?.value;
-      const loc = document.getElementById('session-loc')?.value?.trim() || 'Office';
-      if (!shopId) { toast('Select a shop', 'error'); return; }
-      const id = `ROUND-${gid()}`;
-      const session = { id, shopId, location: loc, creatorId: state.user.id, createdAt: new Date().toISOString(), locked: false, closed: false };
-      state.sessions.push(session);
-      DB.upsertSession(session);
-      setState({ activeSessionId: id, view: 'session', _newSessionShop: '', _newSessionLoc: '' });
-      toast('Round started!');
+      try {
+        const shopId = document.getElementById('session-shop')?.value;
+        const loc = document.getElementById('session-loc')?.value?.trim() || 'Office';
+        if (!shopId) { toast('Select a shop', 'error'); return; }
+        const id = `ROUND-${gid()}`.toUpperCase();
+        const session = { id, joinCode: id, shopId, location: loc, creatorId: state.user.id, createdAt: new Date().toISOString(), locked: false, closed: false };
+        state.sessions.push(session);
+        DB.upsertSession(session);
+        setState({ activeSessionId: id, view: 'session', _newSessionShop: '', _newSessionLoc: '' });
+        toast('Round started! Share the code with your team 🚀');
+      } catch (e) { console.error('createSession failed', e); toast('Failed to create round', 'error'); }
     }
 
     // ── SESSION ───────────────────────────────────────────────────────────────────
@@ -1985,7 +2612,7 @@
           ${svgIcon('map_pin', 13, 'style="flex-shrink:0"')} ${session.location}
         </div>
       </div>
-      <div class="flex gap-8">
+      <div class="flex gap-8 session-header-actions">
         ${isCreator && !session.closed ? `
           <button class="btn btn-dark" onclick="toggleLock('${session.id}')">
             ${svgIcon(session.locked ? 'unlock' : 'lock', 16)} ${session.locked ? 'Unlock' : 'Lock'}
@@ -2087,8 +2714,10 @@
       });
     }
     function removeOrder(id) {
-      DB.deleteOrder(id);
-      state.orders = state.orders.filter(o => o.id !== id); setState({}); toast('Order removed');
+      try {
+        DB.deleteOrder(id);
+        state.orders = state.orders.filter(o => o.id !== id); setState({}); toast('Order removed 🗑️');
+      } catch (e) { console.error('removeOrder failed', e); toast('Failed to remove order', 'error'); }
     }
     function changeQty(itemId, delta) {
       const q = state._orderQty || {};
@@ -2098,12 +2727,19 @@
       if (el) el.textContent = q[itemId];
     }
     function addOrder(sessionId, itemId, itemName, price) {
-      const qty = (state._orderQty || {})[itemId] || 1;
-      const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
-      state.orders.push(order);
-      DB.upsertOrder(order);
-      const q = state._orderQty || {}; q[itemId] = 1; state._orderQty = q;
-      setState({}); toast(`${itemName} added!`);
+      try {
+        const qty = (state._orderQty || {})[itemId] || 1;
+        const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
+        state.orders.push(order);
+        // Optimistic UI — render immediately, then persist
+        const q = state._orderQty || {}; q[itemId] = 1; state._orderQty = q;
+        setState({});
+        DB.upsertOrder(order).then(() => {
+          toast(`${itemName} ×${qty} added! ☕`);
+        }).catch(() => {
+          toast(`${itemName} added (offline)`, 'success');
+        });
+      } catch (e) { console.error('addOrder failed', e); toast('Failed to add order', 'error'); }
     }
 
     // ── PROFILE ───────────────────────────────────────────────────────────────────
@@ -2129,8 +2765,8 @@
             <div class="stack-8">
               <input id="edit-username" class="inp" value="${u.username}" placeholder="Username" style="padding:9px 14px"/>
               <div style="position:relative">
-                <input id="edit-pass" class="inp" type="${state._showEditPass ? 'text' : 'password'}" placeholder="New password (blank = keep)" style="padding:9px 14px;padding-right:42px"/>
-                <button onclick="setState({_showEditPass:!state._showEditPass})" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass ? 'eye_off' : 'eye', 15)}</button>
+                <input id="edit-pass" class="inp" type="${state._showEditPass ? 'text' : 'password'}" placeholder="Password" value="${(u.password || '').replace(/"/g, '&quot;')}" style="padding:9px 14px;padding-right:42px"/>
+                <button onclick="state._showEditPass=!state._showEditPass;render()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass ? 'eye_off' : 'eye', 15)}</button>
               </div>
               <input id="edit-bio" class="inp" value="${u.bio || ''}" placeholder="Bio (optional)" style="padding:9px 14px"/>
               <div class="flex gap-8">
@@ -2154,13 +2790,16 @@
         </div>
       </div>
 
-      <!-- Avatar colors (always visible when editing) -->
+      <!-- Theme color picker (replaces avatar color — shown when editing) -->
       ${state._editProfile ? `
         <div style="margin-bottom:16px">
-          <div class="text-xs upper font-bold text-muted" style="margin-bottom:8px">Avatar Color</div>
+          <div class="text-xs upper font-bold text-muted" style="margin-bottom:10px">Theme Color</div>
           <div class="flex gap-8" style="flex-wrap:wrap">
-            ${AVATAR_COLORS.map(c => `<button class="color-swatch ${u.avatarColor === c ? 'active' : ''}" style="background:${c}" onclick="updateAvatarColor('${c}')"></button>`).join('')}
+            ${Object.entries(THEMES).map(([key, t]) => `
+              <button onclick="setTheme('${key}')" title="${t.name}" style="width:36px;height:36px;border-radius:50%;background:${t.accent};border:3px solid ${state.theme === key ? 'var(--text)' : 'transparent'};cursor:pointer;transition:all .15s;transform:${state.theme === key ? 'scale(1.15)' : 'scale(1)'};flex-shrink:0"></button>
+            `).join('')}
           </div>
+          <div class="text-xs text-muted" style="margin-top:6px">Active: ${THEMES[state.theme]?.name || 'Dark'}</div>
         </div>
       `: ''}
 
@@ -2271,15 +2910,18 @@
     }
 
     function saveProfile() {
-      const username = document.getElementById('edit-username')?.value?.trim();
-      const bio = document.getElementById('edit-bio')?.value?.trim() || '';
-      const pass = document.getElementById('edit-pass')?.value;
-      if (!username) { toast('Username cannot be empty', 'error'); return; }
-      if (state.users.find(u => u.username === username && u.id !== state.user.id)) { toast('Username taken', 'error'); return; }
-      const patch = { username, bio }; if (pass) patch.password = pass;
-      updateUser(patch);
-      DB.upsertUser({ ...state.user, ...patch });
-      setState({ _editProfile: false }); toast('Profile updated!');
+      try {
+        const username = document.getElementById('edit-username')?.value?.trim();
+        const bio = document.getElementById('edit-bio')?.value?.trim() || '';
+        const pass = document.getElementById('edit-pass')?.value?.trim();
+        if (!username) { toast('Username cannot be empty', 'error'); return; }
+        if (!pass || pass.length < 3) { toast('Password must be at least 3 characters', 'error'); return; }
+        if (state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== state.user.id)) { toast('Username taken', 'error'); return; }
+        const patch = { username, bio, password: pass };
+        updateUser(patch);
+        DB.upsertUser({ ...state.user, ...patch });
+        setState({ _editProfile: false, _showEditPass: false }); toast('Profile updated! ✅');
+      } catch (e) { console.error('saveProfile failed', e); toast('Failed to save profile', 'error'); }
     }
     function updateAvatarColor(c) { updateUser({ avatarColor: c }); DB.upsertUser({ ...state.user, avatarColor: c }); setState({}); }
     function setTheme(name) { updateUser({ theme: name }); DB.upsertUser({ ...state.user, theme: name }); setState({ theme: name }); applyTheme(name); toast(`Theme: ${THEMES[name].name}`); }
@@ -2394,16 +3036,26 @@
     let deferredInstall = null;
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault(); deferredInstall = e;
+      // Show banner on next render
       const banner = document.getElementById('install-banner');
       if (banner) banner.classList.add('show');
     });
-
-    function installApp() {
-      if (!deferredInstall) return;
-      deferredInstall.prompt();
-      deferredInstall.userChoice.then(() => { deferredInstall = null; });
+    window.addEventListener('appinstalled', () => {
+      deferredInstall = null;
       const banner = document.getElementById('install-banner');
       if (banner) banner.classList.remove('show');
+      toast('App installed! 🎉');
+    });
+
+    async function installApp() {
+      if (!deferredInstall) return;
+      deferredInstall.prompt();
+      const { outcome } = await deferredInstall.userChoice;
+      deferredInstall = null;
+      if (outcome === 'accepted') {
+        const banner = document.getElementById('install-banner');
+        if (banner) banner.classList.remove('show');
+      }
     }
 
     // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -2413,8 +3065,15 @@
 
       if (!state.user) {
         app.innerHTML = renderLogin();
-        document.getElementById('auth-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-pass')?.focus(); });
-        document.getElementById('auth-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(state._loginReg || false); });
+        // Attach Enter-key listeners after login HTML is injected
+        const nameEl = document.getElementById('auth-name');
+        const passEl = document.getElementById('auth-pass');
+        if (nameEl) nameEl.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); passEl?.focus(); }
+        });
+        if (passEl) passEl.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); submitAuth(state._loginReg || false); }
+        });
         return;
       }
 
@@ -2427,9 +3086,10 @@
       else if (v === 'session') pageHtml = renderSession();
       else if (v === 'profile') pageHtml = renderProfile();
 
+      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
       app.innerHTML = `
     <div id="install-banner" class="${deferredInstall ? 'show' : ''}">
-      ☕ Install TeaRound as an app for the best experience!
+      <span>☕ Install TeaRound for the best mobile experience!</span>
       <button onclick="installApp()">Install</button>
       <button class="close-banner" onclick="this.parentElement.classList.remove('show')">×</button>
     </div>
@@ -2438,9 +3098,13 @@
     ${renderModals()}
   `;
 
+      // Re-show install banner if prompt is still pending (in case it was dismissed via close)
+      if (deferredInstall) {
+        const b = document.getElementById('install-banner');
+        if (b && !b.classList.contains('show')) b.classList.add('show');
+      }
+
       // Re-attach event listeners that can't be inlined
-      document.getElementById('auth-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-pass')?.focus(); });
-      document.getElementById('auth-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(state._loginReg || false); });
       document.getElementById('join-code')?.addEventListener('keydown', e => { if (e.key === 'Enter') quickJoin(); });
       document.getElementById('session-shop')?.addEventListener('change', function () {
         const shop = state.shops.find(s => s.id === this.value);
