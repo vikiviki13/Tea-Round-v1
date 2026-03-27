@@ -75,26 +75,26 @@
 
     /* ── CSS VARIABLES / THEMES ───────────────────────────────────────────────── */
     :root {
-      --bg: #0d0d14;
-      --surface: #141420;
-      --surface2: #1a1a2e;
-      --border: #ffffff0f;
-      --border2: #ffffff18;
-      --text: #f0f0ff;
-      --text2: #8888aa;
-      --text3: #44445a;
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #18181b;
+      --border: #27272a;
+      --border2: #3f3f46;
+      --text: #fafafa;
+      --text2: #a1a1aa;
+      --text3: #52525b;
       --accent: #00c896;
-      --accent-dim: #00c89618;
+      --accent-dim: #00c8961a;
       --accent-text: #00c896;
-      --danger: #ff4466;
-      --danger-dim: #ff446618;
+      --danger: #ef4444;
+      --danger-dim: #ef44441a;
       --warn: #f59e0b;
-      --shadow: 0 4px 24px #00000055;
-      --shadow-md: 0 8px 40px #00000055;
-      --shadow-accent: 0 8px 40px #00c89630;
-      --nav-bg: #0d0d14ee;
-      --radius: 12px;
-      --radius-lg: 16px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --shadow-accent: 0 10px 30px rgba(0, 200, 150, 0.15);
+      --nav-bg: rgba(10, 10, 10, 0.9);
+      --radius: 16px;
+      --radius-lg: 20px;
       --radius-xl: 24px;
       --sidebar-w: 256px;
       --topbar-h: 64px;
@@ -582,22 +582,22 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-md);
       transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
       border-color: var(--border2)
     }
 
     .card-sm {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: var(--radius);
       transition: border-color .2s ease
     }
 
@@ -609,8 +609,8 @@
     .inp {
       width: 100%;
       background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 0 16px;
       height: 48px;
       color: var(--text);
@@ -619,11 +619,12 @@
       font-family: 'Outfit', sans-serif;
       transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
       -webkit-appearance: none;
+      appearance: none;
     }
 
     .inp:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
+      box-shadow: 0 0 0 2px var(--accent-dim);
       outline: none;
       background: var(--surface);
     }
@@ -637,7 +638,8 @@
     }
 
     .inp[type="number"] {
-      -moz-appearance: textfield
+      -moz-appearance: textfield;
+      appearance: textfield;
     }
 
     .inp[type="number"]::-webkit-inner-spin-button,
@@ -658,15 +660,31 @@
     }
 
     /* Buttons */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, .2);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       padding: 0 20px;
-      height: 44px;
-      border-radius: 12px;
-      font-weight: 700;
+      height: 48px;
+      border-radius: var(--radius);
+      font-weight: 600;
       font-size: 14px;
       font-family: 'Outfit', sans-serif;
       letter-spacing: .02em;
@@ -691,52 +709,50 @@
     .btn-primary {
       background: var(--accent);
       color: #0a0a14;
-      box-shadow: 0 4px 16px var(--accent-dim)
+      box-shadow: none;
     }
 
     .btn-primary:hover {
       filter: brightness(1.1);
-      box-shadow: 0 6px 24px var(--accent-dim);
-      transform: translateY(-1px)
+      transform: translateY(-1px);
     }
 
     .btn-primary:active {
       transform: scale(.97) translateY(0);
-      filter: brightness(.98)
+      filter: brightness(.98);
     }
 
     .btn-dark {
       background: var(--surface2);
       color: var(--text);
-      border: 1.5px solid var(--border2)
+      border: 1px solid var(--border2);
     }
 
     .btn-dark:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-dim);
-      transform: translateY(-1px)
+      border-color: var(--border2);
+      background: var(--surface);
+      transform: translateY(-1px);
     }
 
     .btn-dark:active {
-      transform: scale(.97) translateY(0)
+      transform: scale(.97) translateY(0);
     }
 
     .btn-danger {
       background: var(--danger-dim);
       color: var(--danger);
-      border: 1.5px solid var(--danger)
+      border: 1px solid var(--danger);
     }
 
     .btn-danger:hover {
       background: var(--danger);
       color: #fff;
       transform: translateY(-1px);
-      box-shadow: 0 4px 16px var(--danger-dim)
+      box-shadow: none;
     }
 
     .btn-danger:active {
-      transform: scale(.97) translateY(0)
+      transform: scale(.97) translateY(0);
     }
 
     .btn:disabled {
@@ -747,21 +763,21 @@
     }
 
     .btn-sm {
-      height: 36px;
+      height: 40px;
       padding: 0 14px;
       font-size: 13px;
-      border-radius: 10px
+      border-radius: var(--radius);
     }
 
-    /* Icon buttons — 40px square touch target */
+    /* Icon buttons — 44px square touch target */
     .btn-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 11px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       background: var(--surface2);
       color: var(--text2);
       flex-shrink: 0;
@@ -771,14 +787,13 @@
     }
 
     .btn-icon:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-dim);
-      transform: translateY(-1px)
+      border-color: var(--border2);
+      background: var(--surface);
+      transform: translateY(-1px);
     }
 
     .btn-icon:active {
-      transform: scale(.93) translateY(0)
+      transform: scale(.93) translateY(0);
     }
 
     /* Tags/Badges */
@@ -1756,6 +1771,7 @@
       text-align: center;
       transition: all .2s ease;
       -webkit-appearance: none;
+      appearance: none;
     }
 
     .code-input:focus {
@@ -2037,6 +2053,25 @@
 
     // ── DB HELPERS (Supabase-backed, falls back to localStorage if not configured) ─
     const DB = {
+      _realtimeInitialized: false,
+      initRealtime() {
+        const db = getDB();
+        if (!db || this._realtimeInitialized) return;
+        this._realtimeInitialized = true;
+
+        db.channel('tearound-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+            this.loadAll().then(() => { if (typeof render === 'function') render(); });
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, payload => {
+            this.loadAll().then(() => { if (typeof render === 'function') render(); });
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'shops' }, payload => {
+            this.loadAll().then(() => { if (typeof render === 'function') render(); });
+          })
+          .subscribe();
+      },
+
       async loadAll() {
         const db = getDB();
         if (!db) return false; // use localStorage fallback
@@ -2051,8 +2086,15 @@
           state.shops = (shops.data || []).map(s => ({ id: s.id, name: s.name, address: s.address, creatorId: s.creator_id, menu: s.menu || [] }));
           state.sessions = (sessions.data || []).map(s => ({ id: s.id, shopId: s.shop_id, creatorId: s.creator_id, location: s.location, locked: s.locked, closed: s.closed }));
           state.orders = (orders.data || []).map(o => ({ id: o.id, sessionId: o.session_id, userId: o.user_id, userName: o.user_name, itemId: o.item_id, itemName: o.item_name, price: o.price, quantity: o.quantity, note: o.note }));
+
+          this.initRealtime();
+
           return true;
-        } catch (e) { console.warn('Supabase load failed, using localStorage', e); return false; }
+        } catch (e) {
+          console.error("DB ERROR: Supabase load failed", e);
+          toast(e.message || "Database load error", "error");
+          return false;
+        }
       },
 
       async upsertUser(u) {
@@ -2070,40 +2112,79 @@
             theme: u.theme || 'dark',
             avatar_url: u.avatarUrl || null
           });
-          if (error) { console.error('upsertUser error:', error); toast('Failed to save user to DB', 'error'); }
-        } catch (e) { console.error('upsertUser exception:', e); }
+          if (error) {
+            console.error('DB ERROR: upsertUser', error);
+            toast(error.message || 'Failed to save user to DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: upsertUser exception:', e);
+          toast(e.message || 'Failed to save user', 'error');
+        }
       },
       async upsertShop(s) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('shops').upsert({ id: s.id, name: s.name, address: s.address, creator_id: s.creatorId, menu: s.menu });
-          if (error) { console.error('upsertShop error:', error); }
-        } catch (e) { console.error('upsertShop exception:', e); }
+          if (error) {
+            console.error('DB ERROR: upsertShop', error);
+            toast(error.message || 'Failed to save shop to DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: upsertShop exception:', e);
+          toast(e.message || 'Failed to save shop', 'error');
+        }
       },
       async deleteShop(id) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('shops').delete().eq('id', id);
-          if (error) { console.error('deleteShop error:', error); toast('Failed to delete from DB', 'error'); }
-        } catch (e) { console.error('deleteShop exception:', e); }
+          if (error) {
+            console.error('DB ERROR: deleteShop', error);
+            toast(error.message || 'Failed to delete from DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: deleteShop exception:', e);
+          toast(e.message || 'Failed to delete shop', 'error');
+        }
       },
       async upsertSession(s) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('sessions').upsert({ id: s.id, shop_id: s.shopId, creator_id: s.creatorId, location: s.location, locked: s.locked || false, closed: s.closed || false });
-          if (error) { console.error('upsertSession error:', error); }
-        } catch (e) { console.error('upsertSession exception:', e); }
+          if (error) {
+            console.error('DB ERROR: upsertSession', error);
+            toast(error.message || 'Failed to save session to DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: upsertSession exception:', e);
+          toast(e.message || 'Failed to save session', 'error');
+        }
       },
       async upsertOrder(o) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('orders').upsert({ id: o.id, session_id: o.sessionId, user_id: o.userId, user_name: o.userName, item_id: o.itemId, item_name: o.itemName, price: o.price, quantity: o.quantity, note: o.note || '' });
-          if (error) { console.error('upsertOrder error:', error); toast('Failed to save order to DB', 'error'); }
-        } catch (e) { console.error('upsertOrder exception:', e); }
+          if (error) {
+            console.error('DB ERROR: upsertOrder', error);
+            toast(error.message || 'Failed to save order to DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: upsertOrder exception:', e);
+          toast(e.message || 'Failed to save order', 'error');
+        }
       },
       async deleteOrder(id) {
         const db = getDB(); if (!db) return;
-        await db.from('orders').delete().eq('id', id);
+        try {
+          const { error } = await db.from('orders').delete().eq('id', id);
+          if (error) {
+            console.error('DB ERROR: deleteOrder', error);
+            toast(error.message || 'Failed to delete order from DB', 'error');
+          }
+        } catch (e) {
+          console.error('DB ERROR: deleteOrder exception:', e);
+          toast(e.message || 'Failed to delete order', 'error');
+        }
       },
     };
 
@@ -2153,8 +2234,19 @@
         applyTheme(state.theme);
         render(); // render immediately with localStorage data
         const usedDB = await DB.loadAll();
-        if (!usedDB) { loadFromLocalStorage(); }
-        else { localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); } // keep auth in localStorage
+        if (!usedDB) {
+          loadFromLocalStorage();
+        } else {
+          if (state.user) {
+            const freshUser = state.users.find(u => u.id === state.user.id);
+            if (freshUser) {
+              state.user = freshUser;
+              state.theme = freshUser.theme || state.theme;
+            }
+          }
+          localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); // keep auth in localStorage
+        }
+        applyTheme(state.theme);
         render(); // re-render with DB data
       } catch (e) {
         console.error('Boot load failed', e);
@@ -2339,41 +2431,18 @@
         if (!session) { toast('No active session', 'error'); return; }
         if (so.length === 0) { toast('No orders to export', 'error'); return; }
 
-        // Build aggregated totals
-        const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
-        const totalItems = so.reduce((a, o) => a + o.quantity, 0);
-        const totalPrice = so.reduce((a, o) => a + o.price * o.quantity, 0);
-        const dateStr = new Date().toLocaleString('en-IN', { day: '2-digit', month: '1-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        toast('Generating order summary image...');
+        const billPanel = document.querySelector('.bill-panel');
+        if (!billPanel) throw new Error('Bill panel not found');
 
-        const pad = (str, len) => String(str).padEnd(len, ' ');
-        const title = `TEA ROUND SUMMARY - ${(shop?.name || 'TeaRound').toUpperCase()}`;
-        const divider = '-'.repeat(38);
+        const dataUrl = await htmlToImage.toPng(billPanel, { backgroundColor: 'var(--surface2)', style: { transform: 'none' } });
+        const fileName = `TeaRound_Summary_${session.id}_${new Date().toISOString().slice(0, 10)}.png`;
 
-        let lines = [];
-        lines.push(title);
-        lines.push(`Date: ${dateStr}`);
-        lines.push(`Location: ${session.location || '—'}`);
-        lines.push(divider);
-        agg.forEach(([name, qty]) => {
-          lines.push(`${pad(name, 20)} x ${qty}`);
-        });
-        lines.push(divider);
-        lines.push(`Total Items: ${totalItems}`);
-        lines.push(`Total Price: ₹${totalPrice}`);
-        lines.push(`Breakdown by User:`);
-        so.forEach(o => {
-          for (let i = 0; i < o.quantity; i++) {
-            lines.push(`- ${o.userName}: ${o.itemName} (x1)`);
-          }
-        });
-
-        const text = lines.join('\n');
-        const fileName = `TeaRound_Summary_${session.id}_${new Date().toISOString().slice(0, 10)}.txt`;
-
-        // Method 1: Try native share API (best on mobile)
         if (navigator.share) {
           try {
-            const file = new File([text], fileName, { type: 'text/plain' });
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            const file = new File([blob], fileName, { type: 'image/png' });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               await navigator.share({ files: [file], title: 'TeaRound Summary' });
               toast('Summary shared! ✅');
@@ -2381,31 +2450,18 @@
             }
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') console.warn('Share failed, trying download', shareErr);
-            else return; // user cancelled share
+            else return;
           }
         }
 
-        // Method 2: Clipboard + file download
-        try { await navigator.clipboard.writeText(text); toast('Summary copied to clipboard! 📋'); } catch (_) { }
-
-        try {
-          const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = fileName;
-          document.body.appendChild(a); a.click();
-          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-          toast('Summary downloaded! ✅');
-        } catch (dlErr) {
-          // Method 3: data URI fallback for strict mobile browsers
-          const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
-          const a = document.createElement('a');
-          a.href = dataUri; a.download = fileName;
-          document.body.appendChild(a); a.click();
-          document.body.removeChild(a);
-          toast('Summary downloaded! ✅');
-        }
-      } catch (err) { console.error('Download failed', err); toast('Download failed — try copying the text manually', 'error'); }
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 100);
+        toast('Summary downloaded! ✅');
+      } catch (err) { console.error('Download failed', err); toast('Download failed', 'error'); }
     }
 
     // ── RENDER PAGES ─────────────────────────────────────────────────────────────
@@ -2731,16 +2787,22 @@
   </div>`;
     }
 
-    function createShop() {
+    async function createShop() {
       try {
         const name = document.getElementById('shop-name')?.value?.trim();
         const addr = document.getElementById('shop-addr')?.value?.trim();
         if (!name || !addr) { toast('Fill both fields', 'error'); return; }
+
+        const btn = document.querySelector('button[onclick="createShop()"]');
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0a14"></div> Creating...'; }
+
         const shop = { id: gid(), name, address: addr, menu: [], creatorId: state.user.id };
+        await DB.upsertShop(shop);
         state.shops.push(shop);
-        DB.upsertShop(shop);
+
         setState({}); toast('Outlet created! 🏪');
-      } catch (e) { console.error('createShop failed', e); toast('Failed to create shop', 'error'); }
+      } catch (e) { console.error('createShop failed', e); toast('Failed to create shop', 'error'); setState({}); }
     }
 
     // ── EDIT MENU ─────────────────────────────────────────────────────────────────
@@ -2839,18 +2901,23 @@
   </div>`;
     }
 
-    function createSession() {
+    async function createSession() {
       try {
         const shopId = document.getElementById('session-shop')?.value;
         const loc = document.getElementById('session-loc')?.value?.trim() || 'Office';
         if (!shopId) { toast('Select a shop', 'error'); return; }
+
+        const btn = document.querySelector('button[onclick="createSession()"]');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0a14"></div> Starting...'; }
+
         const id = `ROUND-${gid()}`.toUpperCase();
         const session = { id, joinCode: id, shopId, location: loc, creatorId: state.user.id, createdAt: new Date().toISOString(), locked: false, closed: false };
+        await DB.upsertSession(session);
         state.sessions.push(session);
-        DB.upsertSession(session);
+
         setState({ activeSessionId: id, view: 'session', _newSessionShop: '', _newSessionLoc: '' });
         toast('Round started! Share the code with your team 🚀');
-      } catch (e) { console.error('createSession failed', e); toast('Failed to create round', 'error'); }
+      } catch (e) { console.error('createSession failed', e); toast('Failed to create round', 'error'); setState({}); }
     }
 
     // ── SESSION ───────────────────────────────────────────────────────────────────
@@ -2887,9 +2954,6 @@
           <div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.08em;color:#0a0a14">Bill Estimate</div>
           <div class="font-syne font-black" style="font-size:28px;color:#0a0a14">₹${total}</div>
         </div>
-        <button onclick="setState({modal:{type:'split'}})" style="background:rgba(0,0,0,.15);border:none;border-radius:10px;padding:10px 14px;cursor:pointer;color:#0a0a14;font-weight:800;font-size:12px;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:6px">
-          ${svgIcon('calculator', 14, 'style="color:#0a0a14"')} Split ₹${perPerson}/ea
-        </button>
       </div>
     </div>`;
 
@@ -3212,7 +3276,7 @@
   </div>`;
     }
 
-    function saveProfile() {
+    async function saveProfile() {
       try {
         const username = document.getElementById('edit-username')?.value?.trim();
         const bio = document.getElementById('edit-bio')?.value?.trim() || '';
@@ -3220,11 +3284,16 @@
         if (!username) { toast('Username cannot be empty', 'error'); return; }
         if (!pass || pass.length < 3) { toast('Password must be at least 3 characters', 'error'); return; }
         if (state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== state.user.id)) { toast('Username taken', 'error'); return; }
+
+        const btn = document.querySelector('button[onclick="saveProfile()"]');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0a14"></div> Saving...'; }
+
         const patch = { username, bio, password: pass };
         updateUser(patch);
-        DB.upsertUser({ ...state.user, ...patch });
+        await DB.upsertUser({ ...state.user, ...patch });
+
         setState({ _editProfile: false, _showEditPass: false }); toast('Profile updated! ✅');
-      } catch (e) { console.error('saveProfile failed', e); toast('Failed to save profile', 'error'); }
+      } catch (e) { console.error('saveProfile failed', e); toast('Failed to save profile', 'error'); setState({}); }
     }
     function updateAvatarColor(c) { updateUser({ avatarColor: c }); DB.upsertUser({ ...state.user, avatarColor: c }); setState({}); }
     function setTheme(name) { updateUser({ theme: name }); DB.upsertUser({ ...state.user, theme: name }); setState({ theme: name }); applyTheme(name); toast(`Theme: ${THEMES[name].name}`); }
@@ -3266,37 +3335,6 @@
     </div>`;
       }
 
-      if (type === 'split') {
-        const so = getSessionOrders();
-        const byUser = so.reduce((a, o) => { if (!a[o.userId]) a[o.userId] = { name: o.userName, total: 0, items: [] }; a[o.userId].total += o.price * o.quantity; a[o.userId].items.push(`${o.itemName}×${o.quantity}`); return a }, {});
-        const users = Object.values(byUser);
-        const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
-        return `<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
-      <div class="modal-sheet-box">
-        <div class="font-syne font-black" style="font-size:24px;color:var(--text);margin-bottom:6px">Bill Split</div>
-        <div class="text-muted text-sm" style="margin-bottom:20px">₹${total} split among ${users.length} person${users.length !== 1 ? 's' : ''}</div>
-        <div class="stack-8" style="margin-bottom:18px">
-          ${users.length === 0 ? `<div class="empty-state"><div class="empty-text">No orders to split.</div></div>`
-            : users.map(u => `
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="font-bold" style="color:var(--text)">${u.name}</div>
-                <div class="text-xs text-muted">${u.items.join(', ')}</div>
-              </div>
-              <div class="font-black text-accent" style="font-size:18px">₹${u.total}</div>
-            </div>
-          `).join('')}
-        </div>
-        ${users.length > 0 ? `
-          <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-            <span class="font-bold" style="color:var(--accent-text)">Even split</span>
-            <span class="font-black text-accent" style="font-size:20px">₹${Math.ceil(total / users.length)}</span>
-          </div>
-        `: ''}
-        <button class="btn btn-primary w-full" onclick="setState({modal:null})">Done</button>
-      </div>
-    </div>`;
-      }
 
       if (type === 'theme') {
         const themeEmojis = { dark: '🌙', light: '☀️', warm: '🔥', neon: '⚡', ocean: '🌊', rose: '🌸', forest: '🌿' };
