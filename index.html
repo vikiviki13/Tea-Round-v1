@@ -2047,7 +2047,7 @@
             db.from('sessions').select('*'),
             db.from('orders').select('*'),
           ]);
-          state.users = (users.data || []).map(u => ({ id: u.id, username: u.display_name || u.username, password: u.password, role: u.role, joined: u.joined, avatarColor: u.avatar_color, bio: u.bio, theme: u.theme, avatarUrl: u.avatar_url || null }));
+          state.users = (users.data || []).map(u => ({ id: u.id, username: u.display_name || u.username, display_name: u.display_name || u.username, password: u.password, role: u.role, joined: u.joined, avatarColor: u.avatar_color, bio: u.bio, theme: u.theme, avatarUrl: u.avatar_url || null }));
           state.shops = (shops.data || []).map(s => ({ id: s.id, name: s.name, address: s.address, creatorId: s.creator_id, menu: s.menu || [] }));
           state.sessions = (sessions.data || []).map(s => ({ id: s.id, shopId: s.shop_id, creatorId: s.creator_id, location: s.location, locked: s.locked, closed: s.closed }));
           state.orders = (orders.data || []).map(o => ({ id: o.id, sessionId: o.session_id, userId: o.user_id, userName: o.user_name, itemId: o.item_id, itemName: o.item_name, price: o.price, quantity: o.quantity, note: o.note }));
@@ -2060,8 +2060,8 @@
         try {
           const { error } = await db.from('users').upsert({
             id: u.id,
-            username: u.username.toLowerCase(), // lowercase for uniqueness index
-            display_name: u.username,           // preserve original casing
+            username: (u.username || '').toLowerCase(), // lowercase for uniqueness index
+            display_name: u.display_name || u.username,  // preserve original casing
             password: u.password,
             role: u.role,
             joined: u.joined,
@@ -2070,36 +2070,42 @@
             theme: u.theme || 'dark',
             avatar_url: u.avatarUrl || null
           });
-          if (error) { console.error('upsertUser error:', error); toast('Failed to save user to DB', 'error'); }
-        } catch (e) { console.error('upsertUser exception:', e); }
+          if (error) { console.error('SUPABASE ERROR (upsertUser):', error); toast(error.message || 'Failed to save user', 'error'); return false; }
+          return true;
+        } catch (e) { console.error('upsertUser exception:', e); return false; }
       },
       async upsertShop(s) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('shops').upsert({ id: s.id, name: s.name, address: s.address, creator_id: s.creatorId, menu: s.menu });
-          if (error) { console.error('upsertShop error:', error); }
-        } catch (e) { console.error('upsertShop exception:', e); }
+          if (error) { console.error('SUPABASE ERROR (upsertShop):', error); toast(error.message || 'Failed to save shop', 'error'); return false; }
+          return true;
+        } catch (e) { console.error('upsertShop exception:', e); return false; }
       },
       async deleteShop(id) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('shops').delete().eq('id', id);
-          if (error) { console.error('deleteShop error:', error); toast('Failed to delete from DB', 'error'); }
-        } catch (e) { console.error('deleteShop exception:', e); }
+          if (error) { console.error('SUPABASE ERROR (deleteShop):', error); toast(error.message || 'Failed to delete from DB', 'error'); return false; }
+          return true;
+        } catch (e) { console.error('deleteShop exception:', e); return false; }
       },
       async upsertSession(s) {
         const db = getDB(); if (!db) return;
         try {
           const { error } = await db.from('sessions').upsert({ id: s.id, shop_id: s.shopId, creator_id: s.creatorId, location: s.location, locked: s.locked || false, closed: s.closed || false });
-          if (error) { console.error('upsertSession error:', error); }
-        } catch (e) { console.error('upsertSession exception:', e); }
+          if (error) { console.error('SUPABASE ERROR (upsertSession):', error); toast(error.message || 'Failed to save session', 'error'); return false; }
+          return true;
+        } catch (e) { console.error('upsertSession exception:', e); return false; }
       },
       async upsertOrder(o) {
-        const db = getDB(); if (!db) return;
+        const db = getDB(); if (!db) return false;
         try {
+          if (!o.sessionId || !o.userId) { toast('Invalid order data', 'error'); return false; }
           const { error } = await db.from('orders').upsert({ id: o.id, session_id: o.sessionId, user_id: o.userId, user_name: o.userName, item_id: o.itemId, item_name: o.itemName, price: o.price, quantity: o.quantity, note: o.note || '' });
-          if (error) { console.error('upsertOrder error:', error); toast('Failed to save order to DB', 'error'); }
-        } catch (e) { console.error('upsertOrder exception:', e); }
+          if (error) { console.error('SUPABASE ERROR (upsertOrder):', error); toast(error.message || 'Failed to save order', 'error'); return false; }
+          return true;
+        } catch (e) { console.error('upsertOrder exception:', e); return false; }
       },
       async deleteOrder(id) {
         const db = getDB(); if (!db) return;
@@ -2150,17 +2156,37 @@
         state.theme = localStorage.getItem(SK.THEME) || 'dark';
         const auth = g(SK.AUTH, 'null');
         if (auth) { state.user = auth; state.view = 'home'; }
+        // Restore active session from localStorage
+        const savedSession = localStorage.getItem('activeSession');
+        if (savedSession) { state.activeSessionId = state.activeSessionId || savedSession; }
         applyTheme(state.theme);
         render(); // render immediately with localStorage data
         const usedDB = await DB.loadAll();
         if (!usedDB) { loadFromLocalStorage(); }
-        else { localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); } // keep auth in localStorage
+        else {
+          localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); // keep auth in localStorage
+          setupRealtime(); // attach realtime listeners after first successful DB load
+        }
         render(); // re-render with DB data
       } catch (e) {
         console.error('Boot load failed', e);
         loadFromLocalStorage();
         render();
       }
+    }
+
+    function setupRealtime() {
+      const db = getDB();
+      if (!db) return;
+      // Subscribe to all four tables
+      ['orders', 'sessions', 'shops', 'users'].forEach(table => {
+        db.channel(`realtime-${table}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table }, async () => {
+            await DB.loadAll();
+            render();
+          })
+          .subscribe();
+      });
     }
     function save() {
       // Always persist auth + theme locally; data synced to DB per-operation
@@ -2222,7 +2248,7 @@
           save(); render(); return;
         }
         const nu = {
-          id: gid(), username: uRaw, password: p, role: state.users.length === 0 ? 'admin' : 'user',
+          id: gid(), username: uRaw, display_name: uRaw, password: p, role: state.users.length === 0 ? 'admin' : 'user',
           joined: new Date().toLocaleDateString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], bio: '', theme: 'dark'
         };
         state.users.push(nu); state.user = nu;
@@ -2235,7 +2261,7 @@
           state._authError = 'Invalid username or password';
           save(); render(); return;
         }
-        state.user = found;
+        state.user = { ...found, display_name: found.display_name || found.username };
         const userTheme = found.theme || 'dark';
         toast(`Welcome back, ${found.username}!`);
         setState({ view: 'home', theme: userTheme, _loginName: '', _loginPass: '', _showPass: false, _authError: null });
@@ -2465,10 +2491,10 @@
         <div style="font-size:80px;margin-bottom:20px">☕</div>
         <div class="font-syne font-black text-accent" style="font-size:22px;margin-bottom:10px">Group Orders Made Easy</div>
         <p class="text-muted" style="font-size:14px;max-width:280px;margin:0 auto;line-height:1.6">
-          Create rounds, share codes with colleagues, track orders and split bills — all in one place.
+          Create rounds, share codes with colleagues, track orders and see totals — all in one place.
         </p>
         <div style="display:flex;gap:24px;justify-content:center;margin-top:36px">
-          ${['☕ Track Orders', '🏪 Manage Shops', '💰 Split Bills'].map(f => `<div class="text-xs text-muted font-bold">${f}</div>`).join('')}
+          ${['☕ Track Orders', '🏪 Manage Shops', '💰 View Totals'].map(f => `<div class="text-xs text-muted font-bold">${f}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -2520,7 +2546,7 @@
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px">
         ${avatarHtml(state.user, 36, 10)}
         <div style="flex:1;min-width:0">
-          <div class="font-bold truncate" style="font-size:13px;color:var(--text)">${state.user?.username || ''}</div>
+          <div class="font-bold truncate" style="font-size:13px;color:var(--text)">${state.user?.display_name || state.user?.username || ''}</div>
           <div class="text-xs text-muted upper">${state.user?.role || 'user'}</div>
         </div>
         <button class="btn-icon" onclick="handleLogout()" title="Sign out">${svgIcon('logout', 16)}</button>
@@ -2672,15 +2698,25 @@
     function quickJoin() {
       const raw = (document.getElementById('join-code')?.value || '').trim().toUpperCase();
       if (!raw) { toast('Enter a round code', 'error'); return; }
-      // Accept full ID (ROUND-XXXXXX), just the suffix (XXXXXX), or joinCode field
+      // Accept full ID, just the suffix, or joinCode field
       const s = state.sessions.find(s => {
         const id = (s.id || '').toUpperCase();
         const jc = (s.joinCode || '').toUpperCase();
         return id === raw || jc === raw || id === 'ROUND-' + raw || jc === 'ROUND-' + raw || id.endsWith('-' + raw);
       });
-      if (s) { goToSession(s.id); } else { toast('Round not found — check the code and try again', 'error'); }
+      if (s) {
+        state.activeSessionId = s.id;
+        localStorage.setItem('activeSession', s.id);
+        DB.loadAll().then(() => setState({ activeSessionId: s.id, view: 'session' }));
+      } else {
+        toast('Round not found — check the code and try again', 'error');
+      }
     }
-    function goToSession(id) { setState({ activeSessionId: id, view: 'session' }); }
+    function goToSession(id) { 
+      state.activeSessionId = id;
+      localStorage.setItem('activeSession', id);
+      setState({ activeSessionId: id, view: 'session' }); 
+    }
 
     // ── SHOPS ─────────────────────────────────────────────────────────────────────
     function renderShops() {
@@ -2864,7 +2900,6 @@
       const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
       const agg = Object.entries(so.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {}));
       const uniqueUsers = [...new Set(so.map(o => o.userId))];
-      const perPerson = uniqueUsers.length ? Math.ceil(total / uniqueUsers.length) : 0;
       const qty = state._orderQty || {};
 
       const billPanel = `
@@ -2887,10 +2922,21 @@
           <div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.08em;color:#0a0a14">Bill Estimate</div>
           <div class="font-syne font-black" style="font-size:28px;color:#0a0a14">₹${total}</div>
         </div>
-        <button onclick="setState({modal:{type:'split'}})" style="background:rgba(0,0,0,.15);border:none;border-radius:10px;padding:10px 14px;cursor:pointer;color:#0a0a14;font-weight:800;font-size:12px;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:6px">
-          ${svgIcon('calculator', 14, 'style="color:#0a0a14"')} Split ₹${perPerson}/ea
-        </button>
       </div>
+      ${uniqueUsers.length > 0 ? `
+      <div style="padding:12px 16px;border-top:1px solid rgba(0,0,0,.1)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0a0a14;opacity:.7;margin-bottom:8px">Individual Totals</div>
+        ${Object.values(so.reduce((a, o) => {
+          if (!a[o.userId]) a[o.userId] = { name: o.userName, total: 0 };
+          a[o.userId].total += o.price * o.quantity;
+          return a;
+        }, {})).map(u => `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:700;color:#0a0a14;opacity:.8">${u.name}</span>
+            <span style="font-size:13px;font-weight:800;color:#0a0a14">₹${u.total}</span>
+          </div>
+        `).join('')}
+      </div>` : ''}
     </div>`;
 
       return `
@@ -2997,21 +3043,32 @@
     function toggleLock(id) {
       state.sessions = state.sessions.map(s => s.id === id ? { ...s, locked: !s.locked } : s);
       const updated = state.sessions.find(s => s.id === id);
-      DB.upsertSession(updated);
+      DB.upsertSession(updated).then(async () => {
+        await DB.loadAll();
+        render();
+      });
       setState({}); toast(updated?.locked ? 'Round locked' : 'Round unlocked');
     }
     function closeRound(id) {
       confirmDelete('Close this round? Orders will be frozen.', () => {
         state.sessions = state.sessions.map(s => s.id === id ? { ...s, closed: true, locked: true } : s);
         const updated = state.sessions.find(s => s.id === id);
-        DB.upsertSession(updated);
+        DB.upsertSession(updated).then(async () => {
+          await DB.loadAll();
+          render();
+        });
         setState({}); toast('Round closed');
       });
     }
     function removeOrder(id) {
       try {
-        DB.deleteOrder(id);
-        state.orders = state.orders.filter(o => o.id !== id); setState({}); toast('Order removed 🗑️');
+        state.orders = state.orders.filter(o => o.id !== id); 
+        setState({}); 
+        toast('Order removed 🗑️');
+        DB.deleteOrder(id).then(async () => {
+          await DB.loadAll();
+          render();
+        }).catch(e => console.error('removeOrder DB sync failed', e));
       } catch (e) { console.error('removeOrder failed', e); toast('Failed to remove order', 'error'); }
     }
     function changeQty(itemId, delta) {
@@ -3025,12 +3082,17 @@
       try {
         const qty = (state._orderQty || {})[itemId] || 1;
         const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
+        if (!order.sessionId || !order.userId) { toast('Invalid session or user', 'error'); return; }
         state.orders.push(order);
         // Optimistic UI — render immediately, then persist
         const q = state._orderQty || {}; q[itemId] = 1; state._orderQty = q;
         setState({});
-        DB.upsertOrder(order).then(() => {
-          toast(`${itemName} ×${qty} added! ☕`);
+        DB.upsertOrder(order).then(async (ok) => {
+          if (ok !== false) {
+            toast(`${itemName} ×${qty} added! ☕`);
+            await DB.loadAll();
+            render();
+          }
         }).catch(() => {
           toast(`${itemName} added (offline)`, 'success');
         });
@@ -3079,7 +3141,7 @@
           `: `
             <div class="flex-between">
               <div>
-                <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${u.username}</div>
+                <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${u.display_name || u.username}</div>
                 <div class="flex gap-8" style="margin-top:4px">
                   <span class="tag ${u.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u.role === 'admin' ? '👑 Admin' : '👤 Member'}</span>
                   <span class="text-xs text-muted">Since ${u.joined || '?'}</span>
@@ -3220,9 +3282,10 @@
         if (!username) { toast('Username cannot be empty', 'error'); return; }
         if (!pass || pass.length < 3) { toast('Password must be at least 3 characters', 'error'); return; }
         if (state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== state.user.id)) { toast('Username taken', 'error'); return; }
-        const patch = { username, bio, password: pass };
+        const patch = { username, display_name: username, bio, password: pass, theme: state.theme };
         updateUser(patch);
         DB.upsertUser({ ...state.user, ...patch });
+        applyTheme(state.theme);
         setState({ _editProfile: false, _showEditPass: false }); toast('Profile updated! ✅');
       } catch (e) { console.error('saveProfile failed', e); toast('Failed to save profile', 'error'); }
     }
@@ -3261,38 +3324,6 @@
           <span class="font-syne font-black text-accent" style="font-size:22px;letter-spacing:.08em">${id}</span>
           <button class="btn-icon" onclick="navigator.clipboard.writeText('${id}');toast('Code copied!')">${svgIcon('copy', 18)}</button>
         </div>
-        <button class="btn btn-primary w-full" onclick="setState({modal:null})">Done</button>
-      </div>
-    </div>`;
-      }
-
-      if (type === 'split') {
-        const so = getSessionOrders();
-        const byUser = so.reduce((a, o) => { if (!a[o.userId]) a[o.userId] = { name: o.userName, total: 0, items: [] }; a[o.userId].total += o.price * o.quantity; a[o.userId].items.push(`${o.itemName}×${o.quantity}`); return a }, {});
-        const users = Object.values(byUser);
-        const total = so.reduce((a, o) => a + o.price * o.quantity, 0);
-        return `<div class="modal-sheet" onclick="if(event.target===this)setState({modal:null})">
-      <div class="modal-sheet-box">
-        <div class="font-syne font-black" style="font-size:24px;color:var(--text);margin-bottom:6px">Bill Split</div>
-        <div class="text-muted text-sm" style="margin-bottom:20px">₹${total} split among ${users.length} person${users.length !== 1 ? 's' : ''}</div>
-        <div class="stack-8" style="margin-bottom:18px">
-          ${users.length === 0 ? `<div class="empty-state"><div class="empty-text">No orders to split.</div></div>`
-            : users.map(u => `
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="font-bold" style="color:var(--text)">${u.name}</div>
-                <div class="text-xs text-muted">${u.items.join(', ')}</div>
-              </div>
-              <div class="font-black text-accent" style="font-size:18px">₹${u.total}</div>
-            </div>
-          `).join('')}
-        </div>
-        ${users.length > 0 ? `
-          <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-            <span class="font-bold" style="color:var(--accent-text)">Even split</span>
-            <span class="font-black text-accent" style="font-size:20px">₹${Math.ceil(total / users.length)}</span>
-          </div>
-        `: ''}
         <button class="btn btn-primary w-full" onclick="setState({modal:null})">Done</button>
       </div>
     </div>`;
@@ -3590,7 +3621,7 @@
     function removeAvatar() {
       const patch = { avatarUrl: null };
       updateUser(patch);
-      DB.upsertUser({ ...state.user, ...patch });
+      DB.upsertUser({ ...state.user, ...patch, theme: state.theme });
       setState({ _editProfile: false });
       closeCropModal();
       toast('Profile photo removed');
@@ -3620,7 +3651,7 @@
         const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
         const patch = { avatarUrl: dataUrl };
         updateUser(patch);
-        DB.upsertUser({ ...state.user, ...patch });
+        DB.upsertUser({ ...state.user, ...patch, theme: state.theme });
         setState({});
         closeCropModal();
         toast('Profile photo saved! 📸');
