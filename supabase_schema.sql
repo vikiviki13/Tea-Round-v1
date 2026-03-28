@@ -1,94 +1,117 @@
 -- ============================================================
--- TeaRound Pro — Supabase Database Schema
--- Run this entire script in: Supabase > SQL Editor > New Query
+--  TeaRound Pro — Supabase Schema
+--  Run this entire file in: Supabase → SQL Editor → New Query
 -- ============================================================
 
--- 1. USERS TABLE
-create table if not exists public.users (
-  id          text primary key,
-  username    text not null unique,
-  password    text not null,
-  role        text not null default 'user',
-  joined      text,
-  avatar_color text default '#00c896',
-  bio         text default '',
-  theme       text default 'dark',
-  created_at  timestamptz default now()
+
+-- ── 1. TABLES ────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS users (
+  id           TEXT PRIMARY KEY,
+  username     TEXT UNIQUE NOT NULL,   -- stored lowercase for unique constraint
+  display_name TEXT,                   -- original casing shown in UI (e.g. "Viki")
+  password     TEXT NOT NULL,
+  role         TEXT NOT NULL DEFAULT 'user',   -- 'user' | 'admin'
+  joined       TEXT,                   -- display string, e.g. "28/3/2026"
+  avatar_color TEXT,                   -- hex colour used as fallback avatar bg
+  avatar_url   TEXT,                   -- base64 data-URI or public URL
+  bio          TEXT NOT NULL DEFAULT '',
+  theme        TEXT NOT NULL DEFAULT 'dark'
+    CHECK (theme IN ('dark','light','warm','neon','ocean','rose','forest'))
 );
 
--- 2. SHOPS TABLE
-create table if not exists public.shops (
-  id          text primary key,
-  name        text not null,
-  address     text,
-  creator_id  text references public.users(id) on delete set null,
-  menu        jsonb not null default '[]',
-  created_at  timestamptz default now()
+CREATE TABLE IF NOT EXISTS shops (
+  id         TEXT PRIMARY KEY,
+  name       TEXT NOT NULL,
+  address    TEXT,
+  creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  menu       JSONB NOT NULL DEFAULT '[]'::jsonb
+  -- menu item shape: [{ id, name, price, emoji }]
 );
 
--- 3. SESSIONS TABLE
-create table if not exists public.sessions (
-  id          text primary key,
-  shop_id     text references public.shops(id) on delete set null,
-  creator_id  text references public.users(id) on delete set null,
-  location    text,
-  locked      boolean default false,
-  closed      boolean default false,
-  created_at  timestamptz default now()
+CREATE TABLE IF NOT EXISTS sessions (
+  id         TEXT PRIMARY KEY,
+  shop_id    TEXT NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  location   TEXT,
+  locked     BOOLEAN NOT NULL DEFAULT FALSE,
+  closed     BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- 4. ORDERS TABLE
-create table if not exists public.orders (
-  id          text primary key,
-  session_id  text references public.sessions(id) on delete cascade,
-  user_id     text references public.users(id) on delete set null,
-  user_name   text,
-  item_id     text,
-  item_name   text,
-  price       numeric(10,2),
-  quantity    integer default 1,
-  note        text default '',
-  created_at  timestamptz default now()
+CREATE TABLE IF NOT EXISTS orders (
+  id          TEXT PRIMARY KEY,
+  session_id  TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  user_id     TEXT NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
+  user_name   TEXT NOT NULL,           -- denormalised display name at order time
+  item_id     TEXT NOT NULL,
+  item_name   TEXT NOT NULL,
+  price       NUMERIC(10,2) NOT NULL DEFAULT 0,
+  quantity    INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  note        TEXT NOT NULL DEFAULT ''
 );
 
--- ============================================================
--- ROW LEVEL SECURITY (RLS) — Enable for all tables
--- ============================================================
 
-alter table public.users    enable row level security;
-alter table public.shops    enable row level security;
-alter table public.sessions enable row level security;
-alter table public.orders   enable row level security;
+-- ── 2. INDEXES (performance) ─────────────────────────────────
 
--- ============================================================
--- POLICIES — Allow full public access (app handles auth logic)
--- For production you can tighten these with real auth.
--- ============================================================
+CREATE INDEX IF NOT EXISTS idx_shops_creator     ON shops(creator_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_shop     ON sessions(shop_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_creator  ON sessions(creator_id);
+CREATE INDEX IF NOT EXISTS idx_orders_session    ON orders(session_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user       ON orders(user_id);
 
--- Users: allow all reads and inserts
-create policy "users_select" on public.users for select using (true);
-create policy "users_insert" on public.users for insert with check (true);
-create policy "users_update" on public.users for update using (true);
-create policy "users_delete" on public.users for delete using (true);
 
--- Shops: allow all
-create policy "shops_select" on public.shops for select using (true);
-create policy "shops_insert" on public.shops for insert with check (true);
-create policy "shops_update" on public.shops for update using (true);
-create policy "shops_delete" on public.shops for delete using (true);
+-- ── 3. ROW LEVEL SECURITY ────────────────────────────────────
+--  The app uses the anon key for all operations, so we allow
+--  everything through RLS rather than relying on auth.uid().
+--  Tighten these policies later if you add Supabase Auth.
 
--- Sessions: allow all
-create policy "sessions_select" on public.sessions for select using (true);
-create policy "sessions_insert" on public.sessions for insert with check (true);
-create policy "sessions_update" on public.sessions for update using (true);
-create policy "sessions_delete" on public.sessions for delete using (true);
+ALTER TABLE users    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shops    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders   ENABLE ROW LEVEL SECURITY;
 
--- Orders: allow all
-create policy "orders_select" on public.orders for select using (true);
-create policy "orders_insert" on public.orders for insert with check (true);
-create policy "orders_update" on public.orders for update using (true);
-create policy "orders_delete" on public.orders for delete using (true);
+-- Drop policies first so re-running this file is idempotent
+DROP POLICY IF EXISTS "allow_all" ON users;
+DROP POLICY IF EXISTS "allow_all" ON shops;
+DROP POLICY IF EXISTS "allow_all" ON sessions;
+DROP POLICY IF EXISTS "allow_all" ON orders;
 
--- ============================================================
--- DONE! Your TeaRound Pro database is ready.
--- ============================================================
+CREATE POLICY "allow_all" ON users    FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON shops    FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON sessions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON orders   FOR ALL USING (true) WITH CHECK (true);
+
+
+-- ── 4. REALTIME ──────────────────────────────────────────────
+--  Enable Postgres realtime publication for all four tables
+--  so the app's setupRealtime() subscriptions fire correctly.
+
+-- Create the publication if it doesn't exist yet
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) THEN
+    CREATE PUBLICATION supabase_realtime;
+  END IF;
+END
+$$;
+
+ALTER PUBLICATION supabase_realtime ADD TABLE users;
+ALTER PUBLICATION supabase_realtime ADD TABLE shops;
+ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
+ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+
+
+-- ── 5. HELPER: reset all data (dev use only) ─────────────────
+--  Uncomment and run if you want to wipe everything cleanly:
+--
+-- TRUNCATE orders, sessions, shops, users RESTART IDENTITY CASCADE;
+
+
+-- ── DONE ─────────────────────────────────────────────────────
+--  Tables:     users · shops · sessions · orders
+--  RLS:        enabled on all four (allow_all for anon key)
+--  Realtime:   all four tables published
+--  Indexes:    creator/session/user foreign keys indexed
+-- ─────────────────────────────────────────────────────────────
