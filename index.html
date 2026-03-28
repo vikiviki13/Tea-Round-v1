@@ -403,7 +403,7 @@
 
     /* Content area with safe max-width */
     #content {
-      padding: 28px;
+      padding: 24px 28px;
       flex: 1;
       max-width: 900px;
       width: 100%;
@@ -490,7 +490,7 @@
       }
 
       #content {
-        padding: 20px 16px calc(20px + var(--bnav-h) + env(safe-area-inset-bottom, 0px));
+        padding: 16px 16px calc(16px + var(--bnav-h) + env(safe-area-inset-bottom, 0px));
       }
 
       #topbar {
@@ -2164,8 +2164,13 @@
         const usedDB = await DB.loadAll();
         if (!usedDB) { loadFromLocalStorage(); }
         else {
-          localStorage.setItem(SK.AUTH, JSON.stringify(state.user)); // keep auth in localStorage
-          setupRealtime(); // attach realtime listeners after first successful DB load
+          // Re-sync logged-in user from DB so profile/theme/avatar are always fresh
+          if (state.user) {
+            const dbUser = state.users.find(u => u.id === state.user.id);
+            if (dbUser) { state.user = { ...dbUser }; applyTheme(dbUser.theme || 'dark'); }
+          }
+          localStorage.setItem(SK.AUTH, JSON.stringify(state.user));
+          setupRealtime();
         }
         render(); // re-render with DB data
       } catch (e) {
@@ -2252,7 +2257,11 @@
           joined: new Date().toLocaleDateString(), avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], bio: '', theme: 'dark'
         };
         state.users.push(nu); state.user = nu;
-        DB.upsertUser(nu);
+        save(); render(); // show home immediately with localStorage
+        // Save user to DB first — all other operations depend on this FK
+        DB.upsertUser(nu).then(async () => {
+          await DB.loadAll(); render();
+        });
         toast('Account created! Welcome 🎉');
         setState({ view: 'home', _loginName: '', _loginPass: '', _showPass: false, _authError: null });
       } else {
@@ -2349,13 +2358,16 @@
       } catch (e) { console.warn('File download failed', e); }
     }
 
-    function importShop(json) {
+    async function importShop(json) {
       try {
         const data = JSON.parse(json);
         if (!data.name || !Array.isArray(data.menu)) throw new Error();
         const s = { id: gid(), name: data.name, address: data.address || 'Imported', menu: data.menu.map(m => ({ ...m, id: gid() })), creatorId: state.user.id };
         state.shops.push(s); setState({ modal: null });
         toast(`Imported ${s.name}!`);
+        await DB.upsertUser(state.user);
+        await DB.upsertShop(s);
+        await DB.loadAll(); render();
       } catch { toast('Invalid JSON format', 'error'); }
     }
 
@@ -2767,15 +2779,22 @@
   </div>`;
     }
 
-    function createShop() {
+    async function createShop() {
       try {
         const name = document.getElementById('shop-name')?.value?.trim();
         const addr = document.getElementById('shop-addr')?.value?.trim();
         if (!name || !addr) { toast('Fill both fields', 'error'); return; }
+        if (!state.user?.id) { toast('Not logged in', 'error'); return; }
         const shop = { id: gid(), name, address: addr, menu: [], creatorId: state.user.id };
         state.shops.push(shop);
-        DB.upsertShop(shop);
-        setState({}); toast('Outlet created! 🏪');
+        setState({}); // optimistic UI
+        // Ensure user row exists in DB first (FK constraint fix)
+        await DB.upsertUser(state.user);
+        const ok = await DB.upsertShop(shop);
+        if (ok !== false) {
+          toast('Outlet created! 🏪');
+          await DB.loadAll(); render();
+        }
       } catch (e) { console.error('createShop failed', e); toast('Failed to create shop', 'error'); }
     }
 
@@ -2821,7 +2840,7 @@
   </div>`;
     }
 
-    function addMenuItem(shopId) {
+    async function addMenuItem(shopId) {
       try {
         const name = document.getElementById('item-name')?.value?.trim();
         const price = document.getElementById('item-price')?.value;
@@ -2829,16 +2848,21 @@
         const emoji = state._menuEmoji || '🍵';
         state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: [...s.menu, { id: gid(), name, price: parseFloat(price) || 0, emoji }] } : s);
         const updatedShop = state.shops.find(s => s.id === shopId);
-        DB.upsertShop(updatedShop);
-        setState({ _menuEmoji: emoji }); toast('Item added!');
+        setState({ _menuEmoji: emoji }); // optimistic
+        // Ensure user row exists first (FK fix)
+        await DB.upsertUser(state.user);
+        const ok = await DB.upsertShop(updatedShop);
+        if (ok !== false) { toast('Item added! ✅'); await DB.loadAll(); render(); }
       } catch (e) { console.error('addMenuItem failed', e); toast('Failed to add item', 'error'); }
     }
-    function removeMenuItem(shopId, itemId) {
+    async function removeMenuItem(shopId, itemId) {
       try {
         state.shops = state.shops.map(s => s.id === shopId ? { ...s, menu: s.menu.filter(m => m.id !== itemId) } : s);
         const updatedShop = state.shops.find(s => s.id === shopId);
-        DB.upsertShop(updatedShop);
-        setState({}); toast('Item removed');
+        setState({}); // optimistic
+        await DB.upsertUser(state.user);
+        const ok = await DB.upsertShop(updatedShop);
+        if (ok !== false) { toast('Item removed'); await DB.loadAll(); render(); }
       } catch (e) { console.error('removeMenuItem failed', e); toast('Failed to remove item', 'error'); }
     }
 
@@ -2875,17 +2899,22 @@
   </div>`;
     }
 
-    function createSession() {
+    async function createSession() {
       try {
         const shopId = document.getElementById('session-shop')?.value;
         const loc = document.getElementById('session-loc')?.value?.trim() || 'Office';
         if (!shopId) { toast('Select a shop', 'error'); return; }
         const id = `ROUND-${gid()}`.toUpperCase();
-        const session = { id, joinCode: id, shopId, location: loc, creatorId: state.user.id, createdAt: new Date().toISOString(), locked: false, closed: false };
+        const session = { id, joinCode: id, shopId, location: loc, creatorId: state.user.id, locked: false, closed: false };
         state.sessions.push(session);
-        DB.upsertSession(session);
         setState({ activeSessionId: id, view: 'session', _newSessionShop: '', _newSessionLoc: '' });
         toast('Round started! Share the code with your team 🚀');
+        // Ensure user and shop exist in DB first (FK chain: users → shops → sessions)
+        const shop = state.shops.find(s => s.id === shopId);
+        await DB.upsertUser(state.user);
+        if (shop) await DB.upsertShop(shop);
+        const ok = await DB.upsertSession(session);
+        if (ok !== false) { await DB.loadAll(); render(); }
       } catch (e) { console.error('createSession failed', e); toast('Failed to create round', 'error'); }
     }
 
@@ -3043,21 +3072,27 @@
     function toggleLock(id) {
       state.sessions = state.sessions.map(s => s.id === id ? { ...s, locked: !s.locked } : s);
       const updated = state.sessions.find(s => s.id === id);
-      DB.upsertSession(updated).then(async () => {
-        await DB.loadAll();
-        render();
-      });
       setState({}); toast(updated?.locked ? 'Round locked' : 'Round unlocked');
+      const shop = updated ? state.shops.find(s => s.id === updated.shopId) : null;
+      Promise.resolve()
+        .then(() => DB.upsertUser(state.user))
+        .then(() => shop ? DB.upsertShop(shop) : null)
+        .then(() => DB.upsertSession(updated))
+        .then(async () => { await DB.loadAll(); render(); })
+        .catch(e => console.error('toggleLock sync failed', e));
     }
     function closeRound(id) {
       confirmDelete('Close this round? Orders will be frozen.', () => {
         state.sessions = state.sessions.map(s => s.id === id ? { ...s, closed: true, locked: true } : s);
         const updated = state.sessions.find(s => s.id === id);
-        DB.upsertSession(updated).then(async () => {
-          await DB.loadAll();
-          render();
-        });
         setState({}); toast('Round closed');
+        const shop = updated ? state.shops.find(s => s.id === updated.shopId) : null;
+        Promise.resolve()
+          .then(() => DB.upsertUser(state.user))
+          .then(() => shop ? DB.upsertShop(shop) : null)
+          .then(() => DB.upsertSession(updated))
+          .then(async () => { await DB.loadAll(); render(); })
+          .catch(e => console.error('closeRound sync failed', e));
       });
     }
     function removeOrder(id) {
@@ -3081,196 +3116,162 @@
     function addOrder(sessionId, itemId, itemName, price) {
       try {
         const qty = (state._orderQty || {})[itemId] || 1;
-        const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
+        const order = { id: gid(), sessionId, userId: state.user.id, userName: state.user.display_name || state.user.username, itemId, itemName, price: parseFloat(price) || 0, quantity: qty, note: '' };
         if (!order.sessionId || !order.userId) { toast('Invalid session or user', 'error'); return; }
         state.orders.push(order);
-        // Optimistic UI — render immediately, then persist
         const q = state._orderQty || {}; q[itemId] = 1; state._orderQty = q;
-        setState({});
-        DB.upsertOrder(order).then(async (ok) => {
-          if (ok !== false) {
-            toast(`${itemName} ×${qty} added! ☕`);
-            await DB.loadAll();
-            render();
-          }
-        }).catch(() => {
-          toast(`${itemName} added (offline)`, 'success');
-        });
+        setState({}); // optimistic UI
+        // Ensure full FK chain exists: user → shop → session → order
+        const session = state.sessions.find(s => s.id === sessionId);
+        const shop = session ? state.shops.find(s => s.id === session.shopId) : null;
+        Promise.resolve()
+          .then(() => DB.upsertUser(state.user))
+          .then(() => shop ? DB.upsertShop(shop) : null)
+          .then(() => session ? DB.upsertSession(session) : null)
+          .then(() => DB.upsertOrder(order))
+          .then(async (ok) => {
+            if (ok !== false) {
+              toast(`${itemName} ×${qty} added! ☕`);
+              await DB.loadAll(); render();
+            }
+          })
+          .catch(e => { console.error('addOrder chain failed', e); toast(`${itemName} added (offline)`, 'success'); });
       } catch (e) { console.error('addOrder failed', e); toast('Failed to add order', 'error'); }
     }
 
     // ── PROFILE ───────────────────────────────────────────────────────────────────
     function renderProfile() {
-      const tab = state._profileTab || 'overview';
       const u = state.user;
       const userOrders = state.orders.filter(o => o.userId === u?.id);
       const totalSpent = userOrders.reduce((a, o) => a + o.price * o.quantity, 0);
       const stats = { totalOrders: userOrders.length, roundsHosted: state.sessions.filter(s => s.creatorId === u?.id).length, shopsCreated: state.shops.filter(s => s.creatorId === u?.id).length, totalSpent };
-      const earnedBadges = BADGES.filter(b => b.cond(stats));
-
-      const favItems = Object.entries(userOrders.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4);
+      const favItems = Object.entries(userOrders.reduce((a, o) => { a[o.itemName] = (a[o.itemName] || 0) + o.quantity; return a }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const themeEmojis = { dark: '🌙', light: '☀️', warm: '🔥', neon: '⚡', ocean: '🌊', rose: '🌸', forest: '🌿' };
 
       return `
   ${renderTopbar('Profile')}
-  <div id="content">
-    <!-- Hero -->
-    <div class="profile-hero">
-      <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
+  <div id="content" style="max-width:600px">
+
+    <!-- Single profile card -->
+    <div class="card" style="padding:24px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:${state._editProfile ? '20px' : '0'}">
         <div class="avatar-upload-wrap" onclick="openAvatarPicker()" title="Change profile picture">
-          ${avatarHtml(u, 72, 18)}
+          ${avatarHtml(u, 64, 16)}
           <div class="avatar-upload-overlay">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span>Edit Photo</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
           <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarFile(this)"/>
         </div>
-        <div style="flex:1">
-          ${state._editProfile ? `
-            <div class="stack-8">
-              <input id="edit-username" class="inp" value="${u.username}" placeholder="Username" style="padding:9px 14px"/>
-              <div style="position:relative">
-                <input id="edit-pass" class="inp" type="${state._showEditPass ? 'text' : 'password'}" placeholder="Password" value="${(u.password || '').replace(/"/g, '&quot;')}" style="padding:9px 14px;padding-right:42px"/>
-                <button onclick="state._showEditPass=!state._showEditPass;render()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass ? 'eye_off' : 'eye', 15)}</button>
-              </div>
-              <input id="edit-bio" class="inp" value="${u.bio || ''}" placeholder="Bio (optional)" style="padding:9px 14px"/>
-              <div class="flex gap-8">
-                <button class="btn btn-primary" style="flex:1;padding:9px" onclick="saveProfile()">${svgIcon('check', 16)} Save</button>
-                <button class="btn btn-dark" style="flex:1;padding:9px" onclick="setState({_editProfile:false})">${svgIcon('x', 16)} Cancel</button>
-              </div>
-            </div>
-          `: `
-            <div class="flex-between">
-              <div>
-                <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${u.display_name || u.username}</div>
-                <div class="flex gap-8" style="margin-top:4px">
-                  <span class="tag ${u.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u.role === 'admin' ? '👑 Admin' : '👤 Member'}</span>
-                  <span class="text-xs text-muted">Since ${u.joined || '?'}</span>
-                </div>
-                ${u.bio ? `<div class="text-muted" style="font-size:13px;margin-top:6px">${u.bio}</div>` : ''}
-              </div>
-              <button class="btn-icon" onclick="setState({_editProfile:true})">${svgIcon('edit', 16)}</button>
-            </div>
-          `}
+        ${state._editProfile ? '' : `
+        <div style="flex:1;min-width:0">
+          <div class="font-syne font-black" style="font-size:20px;color:var(--text);line-height:1.2">${u.display_name || u.username}</div>
+          <div class="flex gap-6" style="margin-top:5px;flex-wrap:wrap">
+            <span class="tag ${u.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u.role === 'admin' ? '👑 Admin' : '👤 Member'}</span>
+            <span class="text-xs text-muted" style="line-height:1.8">Since ${u.joined || '?'}</span>
+          </div>
+          ${u.bio ? `<div class="text-muted" style="font-size:13px;margin-top:5px">${u.bio}</div>` : ''}
         </div>
+        <button class="btn-icon" onclick="setState({_editProfile:true})" title="Edit profile">${svgIcon('edit', 16)}</button>
+        `}
       </div>
-    </div>
 
-      <!-- Theme color picker (replaces avatar color — shown when editing) -->
       ${state._editProfile ? `
-        <div style="margin-bottom:16px">
-          <div class="text-xs upper font-bold text-muted" style="margin-bottom:10px">Theme Color</div>
-          <div class="flex gap-8" style="flex-wrap:wrap">
-            ${Object.entries(THEMES).map(([key, t]) => `
-              <button onclick="setTheme('${key}')" title="${t.name}" style="width:34px;height:34px;border-radius:50%;background:${t.accent};border:3px solid ${state.theme === key ? 'var(--text)' : 'transparent'};cursor:pointer;transition:all .15s;transform:${state.theme === key ? 'scale(1.18)' : 'scale(1)'};flex-shrink:0"></button>
-            `).join('')}
-          </div>
-          <div class="text-xs text-muted" style="margin-top:6px">Active: ${THEMES[state.theme]?.name || 'Dark'}</div>
+      <div class="stack-12">
+        <div>
+          <label class="form-label">Display Name</label>
+          <input id="edit-username" class="inp" value="${(u.display_name || u.username).replace(/"/g,'&quot;')}" placeholder="Your name"/>
         </div>
-      `: ''}
-
-      <!-- Stats -->
-      <div class="grid-3">
-        ${[{ v: stats.totalOrders, l: 'Orders' }, { v: stats.roundsHosted, l: 'Hosted' }, { v: `₹${stats.totalSpent}`, l: 'Spent' }].map(i => `
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
-            <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${i.v}</div>
-            <div class="text-xs text-muted upper" style="margin-top:2px">${i.l}</div>
+        <div>
+          <label class="form-label">Password</label>
+          <div style="position:relative">
+            <input id="edit-pass" class="inp" type="${state._showEditPass ? 'text' : 'password'}" placeholder="New password" value="${(u.password || '').replace(/"/g,'&quot;')}" style="padding-right:44px"/>
+            <button onclick="state._showEditPass=!state._showEditPass;render()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex">${svgIcon(state._showEditPass?'eye_off':'eye',15)}</button>
           </div>
-        `).join('')}
+        </div>
+        <div>
+          <label class="form-label">Bio</label>
+          <input id="edit-bio" class="inp" value="${(u.bio||'').replace(/"/g,'&quot;')}" placeholder="Short bio (optional)"/>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-primary" style="flex:1" onclick="saveProfile()">${svgIcon('check',16)} Save</button>
+          <button class="btn btn-dark" style="flex:1" onclick="setState({_editProfile:false,_showEditPass:false})">${svgIcon('x',16)} Cancel</button>
+        </div>
       </div>
+      ` : ''}
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      ${[{ id: 'overview', icon: 'bar_chart', l: 'Overview' }, { id: 'history', icon: 'clock', l: 'History' }, { id: 'settings', icon: 'palette', l: 'Settings' }].map(t => `
-        <button class="tab ${tab === t.id ? 'active' : ''}" onclick="setState({_profileTab:'${t.id}'})">${t.l}</button>
-      `).join('')}
+    <!-- Stats row -->
+    <div class="grid-3" style="margin-bottom:20px">
+      ${[{v:stats.totalOrders,l:'Orders'},{v:stats.roundsHosted,l:'Hosted'},{v:`₹${stats.totalSpent}`,l:'Spent'}].map(i=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center">
+          <div class="font-syne font-black" style="font-size:22px;color:var(--text)">${i.v}</div>
+          <div class="text-xs text-muted upper" style="margin-top:3px">${i.l}</div>
+        </div>`).join('')}
     </div>
 
-    <!-- Overview -->
-    ${tab === 'overview' ? `
-      <div class="section-title" style="margin-bottom:8px">Badges</div>
-      <div class="section-sub">${earnedBadges.length} / ${BADGES.length} unlocked</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px">
-        ${BADGES.map(b => {
-        const e = b.cond(stats); return `
-          <div class="badge-card ${e ? 'earned' : ''}">
-            <div class="badge-emoji">${b.icon}</div>
-            <div class="badge-name">${b.label}</div>
-            ${!e ? `<div class="text-xs text-muted" style="margin-top:2px">Locked</div>` : ''}
-          </div>
-        `;
-      }).join('')}
+    ${favItems.length > 0 ? `
+    <!-- Favourites -->
+    <div class="card" style="padding:20px;margin-bottom:20px">
+      <div class="section-title" style="margin-bottom:4px">Favourites</div>
+      <div class="section-sub">Your most ordered items</div>
+      <div class="stack-8">
+        ${favItems.map(([name,count])=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span class="font-bold" style="color:var(--text);font-size:14px">${name}</span>
+            <span class="tag tag-green">×${count}</span>
+          </div>`).join('')}
       </div>
+    </div>` : ''}
 
-      ${favItems.length > 0 ? `
-        <div class="section-title" style="margin-bottom:8px">Favourites</div>
-        <div class="section-sub">Your most ordered items</div>
-        <div class="stack-8">
-          ${favItems.map(([name, count]) => `
-            <div class="card-sm" style="padding:13px 18px;display:flex;justify-content:space-between;align-items:center">
-              <span class="font-bold" style="color:var(--text)">${name}</span>
-              <span class="tag tag-green">×${count}</span>
-            </div>
-          `).join('')}
-        </div>
-      `: ''}
-    `: ''}
-
-    <!-- History -->
-    ${tab === 'history' ? `
-      <div class="section-title" style="margin-bottom:8px">Order History</div>
+    <!-- Order History -->
+    ${userOrders.length > 0 ? `
+    <div class="card" style="padding:20px;margin-bottom:20px">
+      <div class="section-title" style="margin-bottom:4px">Order History</div>
       <div class="section-sub">${userOrders.length} orders placed</div>
       <div class="stack-8">
-        ${userOrders.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No orders yet.</div></div>`
-            : [...userOrders].reverse().map(o => {
-              const sess = state.sessions.find(s => s.id === o.sessionId);
-              const shop = state.shops.find(sh => sh.id === sess?.shopId);
-              return `<div class="card-sm" style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
+        ${[...userOrders].reverse().slice(0,10).map(o=>{
+          const sess=state.sessions.find(s=>s.id===o.sessionId);
+          const shop=state.shops.find(sh=>sh.id===sess?.shopId);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
             <div>
-              <div class="tag tag-green" style="margin-bottom:3px">${o.sessionId}</div>
-              <div class="font-bold" style="font-size:14px;color:var(--text)">${o.itemName} ×${o.quantity}</div>
-              <div class="text-xs text-muted">${shop?.name || 'Unknown shop'}</div>
+              <div class="font-bold" style="font-size:13px;color:var(--text)">${o.itemName} <span class="text-muted">×${o.quantity}</span></div>
+              <div class="text-xs text-muted">${shop?.name||'Unknown'} · ${o.sessionId}</div>
             </div>
-            <div class="font-black" style="color:var(--text2)">₹${o.price * o.quantity}</div>
+            <div class="font-black text-accent" style="font-size:14px">₹${o.price*o.quantity}</div>
           </div>`;
-            }).join('')}
+        }).join('')}
       </div>
-    `: ''}
+    </div>` : ''}
 
-    <!-- Settings -->
-    ${tab === 'settings' ? `
-      <div class="section-title" style="margin-bottom:8px">App Theme</div>
+    <!-- Theme -->
+    <div class="card" style="padding:20px;margin-bottom:20px">
+      <div class="section-title" style="margin-bottom:4px">Theme</div>
       <div class="section-sub">Choose your vibe</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px">
-        ${Object.entries(THEMES).map(([key, t]) => `
-          <div class="theme-card ${state.theme === key ? 'active' : ''}" style="background:${t.surface};border:2px solid ${state.theme === key ? t.accent : t.border}" onclick="setTheme('${key}')">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="font-size:16px">${{ dark: '🌙', light: '☀️', warm: '🔥', neon: '⚡', ocean: '🌊', rose: '🌸', forest: '🌿' }[key]}</span>
-              ${state.theme === key ? `<span style="color:${t.accent};font-size:9px;font-weight:800">ACTIVE</span>` : ''}
-            </div>
-            <div style="font-weight:800;font-size:13px;color:${t.text}">${t.name}</div>
-            <div style="display:flex;gap:5px;margin-top:7px">
-              ${[t.accent, t.text, t['text2']].map(c => `<div style="width:10px;height:10px;border-radius:50%;background:${c}"></div>`).join('')}
-            </div>
-          </div>
-        `).join('')}
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${Object.entries(THEMES).map(([key,t])=>`
+          <div style="background:${t.surface};border:2px solid ${state.theme===key?t.accent:t.border};border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s" onclick="setTheme('${key}')">
+            <div style="font-size:18px;margin-bottom:4px">${themeEmojis[key]||'🎨'}</div>
+            <div style="font-weight:800;font-size:11px;color:${t.text}">${t.name}</div>
+            ${state.theme===key?`<div style="font-size:9px;font-weight:800;color:${t.accent};margin-top:2px">ACTIVE</div>`:''}
+          </div>`).join('')}
       </div>
+    </div>
 
-      <div class="section-title" style="margin-bottom:12px">Account</div>
-      <div class="card" style="overflow:hidden;padding:0">
-        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-          <span class="font-bold" style="color:var(--text)">Role</span>
-          <span class="tag ${u?.role === 'admin' ? 'tag-green' : 'tag-muted'}">${u?.role}</span>
-        </div>
-        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-          <span class="font-bold" style="color:var(--text)">Member since</span>
-          <span class="text-muted text-sm">${u?.joined || '—'}</span>
-        </div>
-        <button onclick="handleLogout()" style="width:100%;padding:16px 20px;display:flex;align-items:center;gap:10px;color:var(--danger);font-weight:800;font-size:14px;font-family:'Outfit',sans-serif;background:none;border:none;cursor:pointer;text-align:left">
-          ${svgIcon('logout', 18)} Sign Out
-        </button>
+    <!-- Account -->
+    <div class="card" style="overflow:hidden;padding:0;margin-bottom:20px">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span class="font-bold" style="color:var(--text)">Role</span>
+        <span class="tag ${u?.role==='admin'?'tag-green':'tag-muted'}">${u?.role==='admin'?'👑 Admin':'👤 Member'}</span>
       </div>
-    `: ''}
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span class="font-bold" style="color:var(--text)">Member since</span>
+        <span class="text-muted" style="font-size:13px">${u?.joined||'—'}</span>
+      </div>
+      <button onclick="handleLogout()" style="width:100%;padding:14px 18px;display:flex;align-items:center;gap:10px;color:var(--danger);font-weight:700;font-size:14px;font-family:'Outfit',sans-serif;background:none;border:none;cursor:pointer;text-align:left">
+        ${svgIcon('logout',18)} Sign Out
+      </button>
+    </div>
+
   </div>`;
     }
 
@@ -3427,19 +3428,20 @@
       else if (v === 'profile') pageHtml = renderProfile();
 
       const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      const installDismissed = localStorage.getItem('tr8_install_dismissed') === '1';
       app.innerHTML = `
-    <div id="install-banner" class="${deferredInstall ? 'show' : ''}">
-      <span>☕ Install TeaRound for the best mobile experience!</span>
+    <div id="install-banner" class="${deferredInstall && !installDismissed ? 'show' : ''}">
+      <span>☕ Install TeaRound for the best experience!</span>
       <button onclick="installApp()">Install</button>
-      <button class="close-banner" onclick="this.parentElement.classList.remove('show')">×</button>
+      <button class="close-banner" onclick="localStorage.setItem('tr8_install_dismissed','1');this.parentElement.classList.remove('show')">×</button>
     </div>
     ${renderNav()}
     <div id="main">${pageHtml}</div>
     ${renderModals()}
   `;
 
-      // Re-show install banner if prompt is still pending (in case it was dismissed via close)
-      if (deferredInstall) {
+      // Only re-show if not dismissed
+      if (deferredInstall && !installDismissed) {
         const b = document.getElementById('install-banner');
         if (b && !b.classList.contains('show')) b.classList.add('show');
       }
