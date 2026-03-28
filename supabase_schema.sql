@@ -24,15 +24,14 @@ CREATE TABLE IF NOT EXISTS shops (
   id         TEXT PRIMARY KEY,
   name       TEXT NOT NULL,
   address    TEXT,
-  creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  creator_id TEXT NOT NULL,
   menu       JSONB NOT NULL DEFAULT '[]'::jsonb
-  -- menu item shape: [{ id, name, price, emoji }]
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
   id         TEXT PRIMARY KEY,
-  shop_id    TEXT NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
-  creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  shop_id    TEXT NOT NULL,
+  creator_id TEXT NOT NULL,
   location   TEXT,
   locked     BOOLEAN NOT NULL DEFAULT FALSE,
   closed     BOOLEAN NOT NULL DEFAULT FALSE
@@ -40,9 +39,9 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS orders (
   id          TEXT PRIMARY KEY,
-  session_id  TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  user_id     TEXT NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
-  user_name   TEXT NOT NULL,           -- denormalised display name at order time
+  session_id  TEXT NOT NULL,
+  user_id     TEXT NOT NULL,
+  user_name   TEXT NOT NULL,
   item_id     TEXT NOT NULL,
   item_name   TEXT NOT NULL,
   price       NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -52,6 +51,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 
 -- ── 2. INDEXES (performance) ─────────────────────────────────
+-- Plain indexes on the join columns (no FK constraints needed)
 
 CREATE INDEX IF NOT EXISTS idx_shops_creator     ON shops(creator_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_shop     ON sessions(shop_id);
